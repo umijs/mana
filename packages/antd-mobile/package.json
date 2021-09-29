@@ -1,0 +1,31 @@
+{
+  "name": "antd-mobile-a",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "types": "es/index.d.ts",
+  "files": [
+    "lib",
+    "es",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/umijs/dumi-lerna-template"
+  },
+  "keywords": [
+    "dumi"
+  ],
+  "authors": [
+    ""
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "antd-mobile": "2.3.3",
+    "classnames": "^2.2.6"
+  }
+}
