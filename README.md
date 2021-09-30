@@ -1,59 +1,23 @@
-# 🌟 Dumi Template
+# MANA
 
-A doc template can assist you to develop libraries & write docs.
+> mana 当前还处于内测阶段
 
-English | [简体中文](./README.zh-CN.md)
+模块化的可扩展前端应用框架，为工作台型产品设计。
 
-## 🚀 How to use?
+## Features
 
-![](https://gw.alipayobjects.com/zos/bmw-prod/91791904-cdde-4408-959d-72fd0c9049b1/kj80x6lv_w1918_h352.png)
+- 快速构建工作台型产品。
+- 模块化，支持不同模块的组合，降低长期维护成本。
+- 可扩展，通过增量代码完成自定义，强大的二次开发能力。
 
-## ✨ Online preview
+## Roadmap
 
-https://umijs.github.io/dumi-template/
+- [x] 基础能力：依赖注入容器、数据观察
+- [ ] 核心能力：动态模块、动态布局 (2021.11)
+- [ ] 通用模块：命令、菜单、快捷键、配置 (2021.11)
 
-## 📒 Catalog Introduction
+## Documentation
 
-```
-├── docs                   Component documentation
-│   ├── index.md           Home page
-│   └── **.**              Site Directory Document
-├── src                    Component home directory
-│   ├── index.ts           Component registration
-│   └── Foo                Component development
-├── .eslintrc.js           eslint config
-├── .fatherrc.ts           father config
-├── .umirc.ts              dumi config
-└── tsconfig.json          typescript config
-```
-
-The rest of the documents can be consulted by yourself.
-
-## 🤖 Command introduction
-
-| Name                    | Description               | Remarks                                                                                                            |
-| ----------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `npm run start`         | Project begining          | Document usage [dumi](https://github.com/umijs/dumi), component development and documentation development together |
-| `npm run test`          | Component test            | -                                                                                                                  |
-| `npm run test:coverage` | Code coverage review      | -                                                                                                                  |
-| `npm run prettier`      | Code prettier             | -                                                                                                                  |
-| `npm run build`         | Component packaging       | Use [father](https://github.com/umijs/father)                                                                      |
-| `npm run release`       | Component package release | -                                                                                                                  |
-| `npm run docs:build`    | Document packaging        | -                                                                                                                  |
-| `npm run docs:deploy`   | Document release          | The default is to use GitHub Pages                                                                                 |
-| `npm run deploy`        | Document package release  | -                                                                                                                  |
-
-### README Badge
-
-Using dumi ? Add a README badge to show it off: [![dumi](https://img.shields.io/badge/docs%20by-dumi-blue)](https://github.com/umijs/dumi)
-
-```
-[![dumi](https://img.shields.io/badge/docs%20by-dumi-blue)](https://github.com/umijs/dumi)
-```
-
-## Discuss group
-
-<div>
-  <img data-type="dingtalk" src="https://gw.alipayobjects.com/zos/bmw-prod/ec249703-be12-416c-8f33-297e47d9439c/kjy5ls84_w1004_h1346.png" width="300" />
-  <img data-type="wechat" src="https://gw.alipayobjects.com/zos/bmw-prod/c18bc2a5-719a-48ca-b225-c79ef88bfb43/k7m10ymd_w1004_h1346.jpeg" width="300" />
-</div>
+- [mana-syringe](./packages/mana-syringe/README.md) 依赖注入容器
+- [mana-observable](./packages/mana-observable/README.md) 数据观察
+- [mana-common](./packages/mana-common/README.md) 基础工具

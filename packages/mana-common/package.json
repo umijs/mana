@@ -1,0 +1,28 @@
+{
+  "name": "mana-common",
+  "keywords": [],
+  "version": "0.1.0",
+  "typings": "dist/index.d.ts",
+  "module": "dist/index.esm.js",
+  "main": "dist/index.js",
+  "files": [
+    "package.json",
+    "README.md",
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "debug": "^4.3.1"
+  },
+  "devDependencies": {
+    "mana-scripts": "^0.1.0"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "lint": "manarun lint",
+    "clean": "manarun clean",
+    "build": "manarun build",
+    "watch": "manarun watch"
+  },
+  "sideEffects": false
+}

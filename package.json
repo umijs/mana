@@ -1,27 +1,85 @@
 {
   "private": true,
+  "name": "mana",
+  "version": "0.1.0",
+  "description": "Mana",
+  "repository": "git@github.com:umijs/mana.git",
+  "workspaces": [
+    "packages/*",
+    "dev-packages/*",
+    "examples/*"
+  ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "start": "dumi dev",
-    "build": "dumi build",
-    "compile": "father-build",
+    "prepare": "lerna run build && lerna run lint",
+    "site": "dumi dev",
+    "site:build": "dumi build",
     "changelog": "lerna-changelog",
-    "clean": "lerna clean -y",
-    "test": "umi-test --coverage",
-    "debug": "umi-test",
-    "publish": "npm run compile && lerna publish"
+    "clean": "yarn build:clean && yarn lint:clean && yarn test:clean && lerna run clean",
+    "clean:all": "yarn clean && lerna clean -y",
+    "build": "lerna run build",
+    "build:clean": "rimraf .umi",
+    "lint": "lerna run lint",
+    "lint:clean": "rimraf .eslintcache",
+    "test": "jest --coverage",
+    "test:clean": "rimraf coverage",
+    "publish": "lerna publish",
+    "publish:next": "lerna publish --canary=next --dist-tag=next",
+    "postpublish": "manarun-check-pub"
   },
   "devDependencies": {
-    "@types/classnames": "^2.2.11",
-    "@types/jest": "^24.0.13",
-    "babel-plugin-version": "^0.2.3",
-    "dumi": "^1.1.7",
-    "dumi-theme-mobile": "^1.0.7",
-    "father-build": "^1.19.2",
+    "@types/jest": "^26.0.23",
     "lerna": "^3.6.0",
     "lerna-changelog": "^0.8.2",
-    "umi-test": "^1.5.12",
-    "umi-tools": "^0.4.0",
-    "umi-types": "^0.5.3"
+    "@types/debug": "^4.1.7",
+    "@types/node": "^14.17.3",
+    "@types/react-test-renderer": "^17.0.1",
+    "@types/power-assert": "^1.5.3",
+    "@types/temp": "^0.8.34",
+    "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.9.1",
+    "@typescript-eslint/eslint-plugin-tslint": "^4.9.1",
+    "@typescript-eslint/parser": "^4.9.1",
+    "@umijs/fabric": "^2.3.1",
+    "antd": "^4.16.6",
+    "concurrently": "^5.3.0",
+    "dumi": "^1.1.18",
+    "dumi-theme-default": "^1.1.1",
+    "eslint": "^7.15.0",
+    "eslint-plugin-deprecation": "^1.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-no-null": "^1.0.2",
+    "father": "^2.28.0",
+    "husky": "^5.1.3",
+    "jest": "^27.0.6",
+    "lint-staged": "^10.5.3",
+    "power-assert": "^1.6.1",
+    "prettier": "^2.2.1",
+    "react-test-renderer": "^17.0.2",
+    "regenerator-runtime": "^0.13.9",
+    "rimraf": "^3.0.2",
+    "temp": "^0.9.4",
+    "ts-jest": "^27.0.4",
+    "ts-node": "^10.1.0",
+    "tslint": "^6.1.3",
+    "typescript": "^4.1.2",
+    "uuid": "^8.3.2",
+    "yorkie": "^2.0.0"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
   }
 }

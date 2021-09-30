@@ -1,0 +1,12 @@
+.listItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.todoItem .todoName {
+  display: inline-block;
+  text-transform: capitalize;
+}
+.todoItem .todoTag {
+  margin-left: 10px;
+}

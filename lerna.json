@@ -1,4 +1,7 @@
 {
+  "version": "0.1.0",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
   "changelog": {
     "labels": {
       "pr(enhancement)": ":rocket: Enhancement",
@@ -7,17 +10,12 @@
       "pr(dependency)": ":deciduous_tree: Dependency",
       "pr(chore)": ":turtle: Chore"
     },
-    "repo": "umijs/father-doc",
+    "repo": "umijs/mana",
     "cacheDir": ".changelog"
   },
-  "packages": [
-    "packages/*"
-  ],
   "command": {
-    "version": {
-      "exact": true
+    "run": {
+      "stream": true
     }
-  },
-  "npmClient": "yarn",
-  "version": "independent"
+  }
 }

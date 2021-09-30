@@ -1,0 +1,8 @@
+.normal {
+  font-family: Georgia, sans-serif;
+  text-align: center;
+}
+
+.normal .ant-input {
+  height: 34px;
+}

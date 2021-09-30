@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "mana-scripts",
+  "version": "0.1.0",
+  "description": "NPM scripts for Mana packages.",
+  "bin": {
+    "manarun": "mana-run.js",
+    "manarun-check-pub": "check-publish.js"
+  },
+  "mana-scripts": {
+    "clean": "manarun build:clean && manarun lint:clean && manarun test:clean",
+    "build": "father build",
+    "build:clean": "rimraf dist lib",
+    "lint": "eslint --cache=true --no-error-on-unmatched-pattern=true \"{src,test}/**/*.{ts,tsx}\"",
+    "lint:clean": "rimraf .eslintcache",
+    "test:clean": "rimraf coverage",
+    "watch": "father build -w",
+    "check-publish": "node check-publish.js"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "mana-syringe",
+  "keywords": [],
+  "version": "0.1.0",
+  "typings": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "files": [
+    "package.json",
+    "README.md",
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "debug": "^4.3.1",
+    "inversify": "^5.0.1"
+  },
+  "devDependencies": {
+    "mana-scripts": "^0.1.0"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "lint": "manarun lint",
+    "clean": "manarun clean",
+    "build": "manarun build",
+    "watch": "manarun watch"
+  }
+}

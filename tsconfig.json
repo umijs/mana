@@ -1,16 +1,12 @@
 {
+  "extends": "./configs/base.tsconfig",
   "compilerOptions": {
-    "target": "esnext",
-    "moduleResolution": "node",
-    "jsx": "preserve",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "declaration": true,
-    "skipLibCheck": true
-  }
+    "baseUrl": ".",
+    "paths": {
+      "mana-common/*": ["packages/mana-common/*"],
+      "mana-observable/*": ["packages/mana-observable/*"],
+      "mana-syringe/*": ["packages/mana-syringe/*"]
+    }
+  },
+  "include": ["dev-packages/*/src", "packages/*/src", "examples/**/*", "**/**.js"]
 }
