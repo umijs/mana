@@ -1,5 +1,7 @@
 # mana-syringe
 
+[![NPM version](https://img.shields.io/npm/v/mana-syringe.svg?style=flat)](https://npmjs.org/package/mana-syringe) [![NPM downloads](https://img.shields.io/npm/dm/mana-syringe.svg?style=flat)](https://npmjs.org/package/mana-syringe)
+
 提供易于使用的依赖注入容器，参考 TSyringe 项目，参考并基于 inversify。
 
 ## 安装

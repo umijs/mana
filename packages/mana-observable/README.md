@@ -1,5 +1,7 @@
 # mana-observable
 
+[![NPM version](https://img.shields.io/npm/v/mana-observable.svg?style=flat)](https://npmjs.org/package/mana-observable) [![NPM downloads](https://img.shields.io/npm/dm/mana-observable.svg?style=flat)](https://npmjs.org/package/mana-observable)
+
 ## 功能
 
 1. 对基于类的数据管理系统提供变更追踪机制。可独立使用，

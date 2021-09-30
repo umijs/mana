@@ -1,5 +1,7 @@
 # MANA
 
+[![codecov](https://codecov.io/gh/umijs/mana/branch/master/graph/badge.svg)](https://codecov.io/gh/umijs/mana) [![GitHub Actions status](https://github.com/umijs/mana/workflows/Node%20CI/badge.svg)](https://github.com/umijs/mana)
+
 > mana 当前还处于内测阶段
 
 模块化的可扩展前端应用框架，为工作台型产品设计。
@@ -13,8 +15,8 @@
 ## Roadmap
 
 - [x] 基础能力：依赖注入容器、数据观察
-- [ ] 核心能力：动态模块、动态布局 (2021.11)
-- [ ] 通用模块：命令、菜单、快捷键、配置 (2021.11)
+- [ ] 核心能力：动态模块、动态布局
+- [ ] 通用模块：命令、菜单、快捷键、配置
 
 ## Documentation
 
