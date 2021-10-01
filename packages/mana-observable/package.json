@@ -12,9 +12,9 @@
     "src"
   ],
   "dependencies": {
+    "debug": "^4.3.1",
     "mana-common": "^0.1.0",
-    "mana-syringe": "^0.1.0",
-    "debug": "^4.3.1"
+    "mana-syringe": "^0.1.0"
   },
   "peerDependencies": {
     "react": ">=16.9.0"
