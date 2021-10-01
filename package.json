@@ -23,7 +23,7 @@
     "lint:clean": "rimraf .eslintcache",
     "test": "jest --coverage",
     "test:clean": "rimraf coverage",
-    "publish": "lerna publish",
+    "publish:latest": "lerna publish",
     "publish:next": "lerna publish --canary=next --dist-tag=next",
     "postpublish": "manarun-check-pub"
   },
