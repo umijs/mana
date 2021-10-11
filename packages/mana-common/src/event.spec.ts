@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import assert from 'power-assert';
+import assert from 'assert';
 import type { Disposable } from '.';
 import { Event, Emitter } from './';
 

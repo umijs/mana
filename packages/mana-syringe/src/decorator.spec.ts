@@ -1,4 +1,4 @@
-import assert from 'power-assert';
+import assert from 'assert';
 import { Syringe } from './core';
 import { singleton, transient, injectable } from './decorator';
 
@@ -7,7 +7,7 @@ describe('decorator', () => {
     @injectable()
     class Foo {}
     const option = Reflect.getMetadata(Syringe.ClassOptionSymbol, Foo);
-    assert((option.target = Foo));
+    assert(option.target === Foo);
   });
   it('#injectable with option', () => {
     const FooSymbol = Symbol('FooSymbol');

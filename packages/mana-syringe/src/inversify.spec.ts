@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import 'reflect-metadata';
-import assert from 'power-assert';
+import assert from 'assert';
 import { injectable } from 'inversify';
 import { bindSingleton, bindTransient, bindLifecycle } from './inversify';
 import { Syringe } from './core';

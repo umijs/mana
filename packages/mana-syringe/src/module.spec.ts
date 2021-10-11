@@ -1,4 +1,4 @@
-import assert from 'power-assert';
+import assert from 'assert';
 import { GlobalContainer } from './container';
 import { injectable } from './decorator';
 import { Module } from './module';

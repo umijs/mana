@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import 'react';
 import { GlobalContainer } from 'mana-syringe';
-import assert from 'power-assert';
+import assert from 'assert';
 import { defaultObservableContext } from './context';
 import { prop, observable } from './observable';
 import { Tracker } from './tracker';

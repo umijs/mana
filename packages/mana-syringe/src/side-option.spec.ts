@@ -1,4 +1,4 @@
-import assert from 'power-assert';
+import assert from 'assert';
 import { register, GlobalContainer } from './container';
 import { singleton } from './decorator';
 import { registerSideOption } from './side-option';

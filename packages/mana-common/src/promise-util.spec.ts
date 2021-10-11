@@ -1,4 +1,4 @@
-import assert from 'power-assert';
+import assert from 'assert';
 import { timeout, retry } from './';
 import { CancellationTokenSource } from './';
 import { Deferred } from './';

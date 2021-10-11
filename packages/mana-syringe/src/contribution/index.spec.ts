@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import 'reflect-metadata';
-import assert from 'power-assert';
+import assert from 'assert';
 import { GlobalContainer } from '../container';
 import { register } from '../container';
 import { inject, singleton } from '../decorator';

@@ -1,4 +1,4 @@
-import assert from 'power-assert';
+import assert from 'assert';
 import { injectable } from 'inversify';
 import { toRegistryOption } from './register';
 import { Syringe, Utils } from './core';

@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 
-import assert from 'power-assert';
+import assert from 'assert';
 import { prop, observable } from './observable';
 import { watch } from './watch';
 import { Disposable } from 'mana-common';

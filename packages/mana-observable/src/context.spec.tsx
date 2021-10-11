@@ -3,7 +3,7 @@
 import 'regenerator-runtime/runtime';
 
 import React from 'react';
-import assert from 'power-assert';
+import assert from 'assert';
 import { prop, observable } from './observable';
 import { Provider } from './context';
 import { GlobalContainer } from 'mana-syringe';

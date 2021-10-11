@@ -1,4 +1,4 @@
-import assert from 'power-assert';
+import assert from 'assert';
 import { register, GlobalContainer, Container } from './container';
 import { singleton, transient, injectable } from './decorator';
 import { Syringe } from './core';

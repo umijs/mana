@@ -2,7 +2,7 @@
 import 'regenerator-runtime/runtime';
 
 import 'react';
-import assert from 'power-assert';
+import assert from 'assert';
 import { prop, observable } from './observable';
 import { defaultObservableContext } from './context';
 import { ReactiveSymbol } from './core';
