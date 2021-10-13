@@ -27,7 +27,6 @@ const emptyOptions: Syringe.FormattedInjectOption<any> = {
   useClass: [],
   contrib: [],
   useFactory: [],
-  useValue: undefined,
 };
 
 describe('inversify', () => {

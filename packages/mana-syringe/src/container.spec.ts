@@ -99,6 +99,12 @@ describe('container', () => {
       assert(foo1 !== foo3);
       assert(foo3 !== foo2);
     });
+    it('#undefined value', () => {
+      const TokenSymbol = Symbol('UndefinedToken');
+      register({ token: TokenSymbol, useValue: undefined });
+      const foo1 = GlobalContainer.get(TokenSymbol);
+      assert(typeof foo1 === 'undefined');
+    });
     it('#get all', () => {
       const token = Syringe.defineToken('token');
       @singleton()

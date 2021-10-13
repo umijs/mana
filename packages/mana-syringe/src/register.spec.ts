@@ -44,6 +44,15 @@ describe('register helper', () => {
       assert(parsed.useClass.includes(Foo));
       assert(parsed.useClass.includes(Bar));
     });
+    it('#undefined value', () => {
+      const TokenSymbol = Symbol('UndefinedToken');
+      const parsed = toRegistryOption({ token: TokenSymbol, useValue: undefined });
+      assert(parsed.token.length === 1);
+      assert(parsed.token.includes(TokenSymbol));
+      assert(parsed.useValue === undefined);
+      assert('useValue' in parsed);
+      assert(parsed.lifecycle === Syringe.DefaultOption.lifecycle);
+    });
   });
 
   describe('error option', () => {
