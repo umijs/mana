@@ -19,7 +19,6 @@ export function toRegistryOption<P>(
   const useClass = Utils.maybeArrayToArray(options.useClass);
   const useDynamic = Utils.maybeArrayToArray(options.useDynamic);
   const useFactory = Utils.maybeArrayToArray(options.useFactory);
-  const { useValue } = options;
   const contrib = Utils.maybeArrayToArray(options.contrib);
   const lifecycle = options.lifecycle || Syringe.Lifecycle.transient;
 
@@ -33,8 +32,10 @@ export function toRegistryOption<P>(
     contrib,
     useDynamic,
     useFactory,
-    useValue,
   };
+  if ('useValue' in options) {
+    generalOption.useValue = options.useValue;
+  }
   return generalOption;
 }
 export class Register<T> {
@@ -101,7 +102,7 @@ export class Register<T> {
       parsedOption.useClass.length === 0 &&
       parsedOption.useDynamic.length === 0 &&
       parsedOption.useFactory.length === 0 &&
-      parsedOption.useValue === undefined
+      !('useValue' in parsedOption)
     ) {
       log('No value to register for token:', parsedOption.token);
       return;
@@ -158,8 +159,8 @@ export class Register<T> {
   }
   // eslint-disable-next-line consistent-return
   protected resolveMono(context: InversifyContext): interfaces.BindingWhenOnSyntax<T> | undefined {
-    if (this.option.useValue !== undefined) {
-      return bindMonoToken(this.generalToken, context).toConstantValue(this.option.useValue);
+    if ('useValue' in this.option) {
+      return bindMonoToken(this.generalToken, context).toConstantValue(this.option.useValue!);
     }
     if (this.option.useDynamic.length > 0) {
       const dynamic = this.option.useDynamic[this.option.useDynamic.length - 1];
@@ -199,8 +200,8 @@ export class Register<T> {
       ),
     );
     const valueToBind =
-      this.option.useValue !== undefined
-        ? bindGeneralToken(this.generalToken, context).toConstantValue(this.option.useValue)
+      'useValue' in this.option
+        ? bindGeneralToken(this.generalToken, context).toConstantValue(this.option.useValue!)
         : undefined;
     if (this.named) {
       classesList.forEach(tobind => this.named && bindNamed(tobind, this.named));
