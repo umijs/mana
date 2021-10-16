@@ -8,17 +8,15 @@ console.warn = () => {};
 console.log = () => {};
 console.error = () => {};
 
-describe('event', () => {
-  describe('Event', () => {
-    it('#event map transformer', done => {
-      const emitterNumber = new Emitter<number>();
-      const eventString = Event.map(emitterNumber.event, e => e.toString());
-      eventString(e => {
-        assert(typeof e === 'string');
-        done();
-      });
-      emitterNumber.fire(1);
+describe('Event', () => {
+  it('#event map transformer', done => {
+    const emitterNumber = new Emitter<number>();
+    const eventString = Event.map(emitterNumber.event, e => e.toString());
+    eventString(e => {
+      assert(typeof e === 'string');
+      done();
     });
+    emitterNumber.fire(1);
   });
 
   it('#event basic', done => {

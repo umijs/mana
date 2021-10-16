@@ -3,7 +3,7 @@ import { timeout, retry } from './';
 import { CancellationTokenSource } from './';
 import { Deferred } from './';
 
-describe('promise util', () => {
+describe('Promise util', () => {
   it('#timeout', async () => {
     const source = new CancellationTokenSource();
     const res = await timeout(50, source.token);

@@ -5,7 +5,7 @@ import { DisposableCollection } from './';
 console.warn = () => {};
 console.log = () => {};
 console.error = () => {};
-describe('disposable', () => {
+describe('Disposable', () => {
   it('#Disposable is', () => {
     assert(Disposable.is({ dispose: () => {} }));
   });

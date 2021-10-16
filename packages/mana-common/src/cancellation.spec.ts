@@ -8,7 +8,7 @@ import {
 } from './';
 import { Deferred } from './';
 
-describe('cancellation', () => {
+describe('Cancellation', () => {
   const waitTime = (number = 100) => {
     const waitDeferred = new Deferred<void>();
     setTimeout(() => {

@@ -4,4 +4,5 @@ export * from './disposable';
 export * from './disposable-collection';
 export * from './deferred';
 export * from './promise-util';
+export * from './priority';
 export * from './types';
