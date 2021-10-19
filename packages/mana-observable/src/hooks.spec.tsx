@@ -9,13 +9,13 @@ import { GlobalContainer } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
 import { useInject } from './hooks';
 import { getOrigin } from './tracker';
-import renderer from 'react-test-renderer';
+import renderer, { act } from 'react-test-renderer';
 
 describe('use', () => {
   defaultObservableContext.config({
     getContainer: () => GlobalContainer,
   });
-  it('#use inject', () => {
+  it('#use inject', done => {
     @singleton()
     class FooModel {
       @prop() info: number = 1;
@@ -32,14 +32,20 @@ describe('use', () => {
       const foo = useInject(FooModel);
       return <div>{foo.info}</div>;
     };
-    const component = renderer.create(
-      <>
-        <FooRender />
-        <FooRender2 />
-      </>,
-    );
-    const json: any = component.toJSON();
-    assert(json && json.find((item: any) => item.children.includes('1')));
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(
+        <>
+          <FooRender />
+          <FooRender2 />
+        </>,
+      );
+    });
+    act(() => {
+      const json: any = component.toJSON();
+      assert(json && json.find((item: any) => item.children.includes('1')));
+      done();
+    });
   });
 
   it('#use inject onChange', done => {
@@ -63,10 +69,9 @@ describe('use', () => {
         assert(fooInstance === getOrigin(foo));
         foo.info += 1;
         foo.info1 += 1;
-
-        setTimeout(() => {
+        act(() => {
           foo.info1 += 1;
-        }, 50);
+        });
       }, [foo]);
       return (
         <div>
@@ -76,10 +81,44 @@ describe('use', () => {
         </div>
       );
     };
-    const component = renderer.create(<FooRender />);
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(<FooRender />);
+    });
     setTimeout(() => {
       const json: any = component.toJSON();
       assert(json && json.children.includes('3'));
+      assert(json && json.children.includes('1'));
+      done();
+    }, 100);
+  });
+
+  it('#computed property with this', done => {
+    @singleton()
+    class FooModel {
+      @prop() info: number[] = [];
+      get length(): number {
+        return this.info.length;
+      }
+      constructor() {
+        observable(this);
+      }
+    }
+    GlobalContainer.register(FooModel);
+    const fooInstance = GlobalContainer.get(FooModel);
+    const FooRender = () => {
+      const foo = useInject(FooModel);
+      return <div>{foo.length}</div>;
+    };
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(<FooRender />);
+    });
+    act(() => {
+      fooInstance.info.push(1);
+    });
+    setTimeout(() => {
+      const json: any = component.toJSON();
       assert(json && json.children.includes('1'));
       done();
     }, 100);

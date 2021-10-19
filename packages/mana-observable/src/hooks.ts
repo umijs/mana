@@ -13,7 +13,7 @@ function reactiveObject<T extends Record<string, any>>(
   dispatch: React.Dispatch<Action<T>>,
 ): T {
   const obj = getOrigin(object);
-  return new Proxy(obj, {
+  const proxy = new Proxy(obj, {
     get(target: any, property: string | symbol): any {
       if (property === ReactiveSymbol.ObjectSelf) {
         return obj;
@@ -36,13 +36,22 @@ function reactiveObject<T extends Record<string, any>>(
         });
         Reflect.defineMetadata(property, toDispose, dispatch);
       }
-      const value = target[property];
+      const ownDesc = Reflect.getOwnPropertyDescriptor(obj, property);
+      const prototype = Object.getPrototypeOf(obj);
+      const protoDesc = prototype && Reflect.getOwnPropertyDescriptor(prototype, property);
+      let value;
+      if (!ownDesc && protoDesc?.get) {
+        value = protoDesc.get.call(proxy);
+      } else {
+        value = target[property];
+      }
       if (typeof value === 'function') {
         return value.bind(obj);
       }
       return value;
     },
   });
+  return proxy;
 }
 
 interface Action<T> {
