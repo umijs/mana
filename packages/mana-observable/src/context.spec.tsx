@@ -2,6 +2,7 @@
 
 import 'regenerator-runtime/runtime';
 
+import type { ErrorInfo } from 'react';
 import React from 'react';
 import assert from 'assert';
 import { prop, observable } from './observable';
@@ -10,6 +11,29 @@ import { GlobalContainer } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
 import { useInject } from './hooks';
 import renderer from 'react-test-renderer';
+
+console.error = () => {};
+class ErrorBoundary extends React.Component {
+  state: { error?: Error; errorInfo?: ErrorInfo } = {
+    error: undefined,
+    errorInfo: undefined,
+  };
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ error, errorInfo });
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div>
+          {this.state.error && this.state.error.toString()}
+          <br />
+          {this.state.errorInfo?.componentStack}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 describe('context', () => {
   it('#without initial', () => {
@@ -21,18 +45,25 @@ describe('context', () => {
       }
     }
     GlobalContainer.register(FooModel);
-    const FooRender = () => {
+    const ErrorRender = () => {
       const foo = useInject(FooModel);
-      return <div>{foo?.info || (foo as any).message}</div>;
+      return <div>{foo.info}</div>;
     };
-    try {
-      renderer.create(<FooRender />);
-    } catch (ex: any) {
-      assert(ex.message.includes('please check the context settings'));
-    }
+    const component = renderer.create(
+      <ErrorBoundary>
+        <ErrorRender />
+      </ErrorBoundary>,
+    );
+    const json: any = component.toJSON();
+    assert(
+      json.children.find(
+        (item: any) =>
+          typeof item === 'string' && item.includes('please check the context settings'),
+      ),
+    );
   });
 
-  it('#provider', () => {
+  it('#provider', done => {
     @singleton()
     class FooModel {
       @prop() info: number = 1;
@@ -40,17 +71,19 @@ describe('context', () => {
         observable(this);
       }
     }
-    GlobalContainer.register(FooModel);
-    const FooRender = () => {
+    const container = GlobalContainer.createChild();
+    container.register(FooModel);
+    const ContextRender = () => {
       const foo = useInject(FooModel);
       return <div>{foo.info}</div>;
     };
     const component = renderer.create(
-      <Provider getContainer={() => GlobalContainer}>
-        <FooRender />
+      <Provider getContainer={() => container}>
+        <ContextRender />
       </Provider>,
     );
     const json: any = component.toJSON();
     assert(json && json.children.includes('1'));
+    done();
   });
 });

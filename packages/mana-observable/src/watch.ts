@@ -2,6 +2,8 @@ import { Disposable } from 'mana-common';
 import type { Reaction } from './core';
 import { Tracker, getOrigin } from './tracker';
 
+console.warn = () => {};
+
 function watchAll<T>(target: T, callback: Reaction): Disposable {
   const data = getOrigin(target);
   const tracker = Tracker.getOrCreate(data);
