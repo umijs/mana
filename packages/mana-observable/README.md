@@ -66,7 +66,7 @@ class Ninja {
 在 react 组件中，如果希望使用依赖注入容器中带有可追踪属性的对象，那么可以使用 useInject 来获取他们。
 
 ```typescript
-@injectable()
+@singleton()
 class Ninja {
   @prop name: string = '';
   constructor() {
@@ -74,7 +74,7 @@ class Ninja {
   }
 }
 
-container.bind(Ninja).toSelf().inSingletonScope();
+container.register(Ninja);
 
 export function NinjaRender() {
   const ninja = useInject(Ninja);
