@@ -10,9 +10,9 @@
 npm i mana-syringe --save
 ```
 
-## 概念
+## 概念与使用
 
-1. 注入标识 token
+### 注入标识 token
 
 注入绑定对象所使用的的标识，可以带有一定的类型约束
 
@@ -20,51 +20,15 @@ npm i mana-syringe --save
 Token<T> = string | symbol | Newable<T> | Abstract<T> | Syringe.DefinedToken<T>;
 ```
 
-我们可以比较开放的使用标识，考虑到多包的协作，一般会使用 symbol 类型，标识默认支持单绑定，需要使用多绑定时，应该使用 Syringe.defineToken 方法获得，其接受是否可多绑定的设置。
+除 `Syringe.DefinedToken<T>` 默认支持多绑定外，注入标识只支持单一绑定关系。可以使用如下 API 生成 DefinedToken
 
-2. 容器 Container
+```typescript
+Syringe.defineToken('sample-token');
+```
+
+### 容器 Container
 
 包含一组绑定标识与注入对象关系描述的上下文成为容器，当我们通过容器获取实例时，容器会根据注入对象及其与标识的关系自动构建所需的其他实例。
-
-3. 生命期 lifecycle
-
-容器会根据注入对象的生命期描述托管这些对象。
-
-```typescript
-export enum Lifecycle {
-  singleton = 'singleton',
-  transient = 'transient',
-}
-```
-
-## 使用
-
-### 装饰器
-
-我们提供了一组对类与属性的装饰器函数，用来快速完成基于依赖注入的类型描述，并完成基本的绑定关系描述。
-
-- injectable: 通用装饰器，接受所有绑定描述参数
-- singleton: 单例装饰器，接受除生命期外的描述参数
-- transient: 多例装饰器，接受除生命期外的描述参数
-- inject: 注入，接受注入标识作为参数，并接受类型描述
-
-```typescript
-@singleton()
-class Shuriken implements Weapon {
-  public hit() {
-    console.log('Shuriken hit');
-  }
-}
-@transient()
-class Ninja {
-  @inject(Weapon) public weapon: Weapon;
-  public hit() {
-    this.weapon.hit();
-  }
-}
-```
-
-### 容器
 
 用户可以手动创建容器，使用全局默认的容器，或者创建子容器
 
@@ -75,7 +39,15 @@ const container = new Container();
 const child = container.createChild();
 ```
 
-### 注册
+我们使用 `token` 从容器里获取对象
+
+```typescript
+const ninja = child.get(Ninja);
+```
+
+当我们从子容器中获取对象时，会先从子容器查找绑定关系和缓存信息，如果不存在，则继续向父容器查找。
+
+### 注册 register
 
 容器上暴露了 register 方法，这个 API 是整个体系的核心。 register 方法有两种签名
 
@@ -109,6 +81,59 @@ interface {
 - useDynamic 可以为数组，基于带有容器信息的上下文给出实例
 - useValue 可以为数组，常量直接给出值
 
+#### 生命期 lifecycle
+
+容器会根据注入对象的生命期描述托管这些对象，决定是否使用缓存等。
+
+```typescript
+export enum Lifecycle {
+  singleton = 'singleton',
+  transient = 'transient',
+}
+```
+
+#### 注册类和别名
+
+```typescript
+@singleton({ contrib: Alias })
+class Shuriken implements Weapon {
+  public hit() {
+    console.log('Shuriken hit');
+  }
+}
+GlobalContainer.register(Shuriken);
+GlobalContainer.register(Shuriken, {
+  useClass: Shuriken,
+  lifecycle: Syringe.Lifecycle.singleton,
+});
+```
+
+#### 注册值
+
+```typescript
+const ConstantValue = Symbol('ConstantValue');
+GlobalContainer.register({ token: ConstantValue, useValue: {} });
+```
+
+#### 注册动态值
+
+```typescript
+const NinjaAlias = Symbol('NinjaAlias');
+GlobalContainer.register({
+  token: NinjaAlias,
+  useDynamic: ctx => ctx.container.get(Ninja),
+});
+```
+
+### 装饰器
+
+我们提供了一组对类与属性的装饰器函数，用来快速完成基于依赖注入的类型描述，并完成基本的绑定关系描述。
+
+- injectable: 通用装饰器，接受所有绑定描述参数
+- singleton: 单例装饰器，接受除生命期外的描述参数
+- transient: 多例装饰器，接受除生命期外的描述参数
+- inject: 注入，接受注入标识作为参数，并接受类型描述
+
 ```typescript
 @singleton()
 class Shuriken implements Weapon {
@@ -116,8 +141,68 @@ class Shuriken implements Weapon {
     console.log('Shuriken hit');
   }
 }
+@transient()
+class Ninja {
+  @inject(Weapon) public weapon: Weapon;
+  public hit() {
+    this.weapon.hit();
+  }
+}
+```
+
+### 扩展点 Contribution
+
+我们通常将依赖注入的多绑定模式以扩展点的形式使用，为了方便在项目中使用这种模式，我们内置了对扩展点的定义和支持。
+
+#### 扩展点的定义与注册
+
+```typescript
+const Waepon = Syringe.defineToken('Weapon');
+Contribution.register(GlobalContainer.register, Waepon);
+```
+
+#### 扩展服务 Contribution.Provider
+
+内置了扩展点的管理服务，用户一般直接使用即可，注册扩展点以后，通过如下方式获取扩展服务
+
+```typescript
+@contrib(Weapon) public weaponProvider: Contribution.Provider<Weapon>;
+```
+
+等价于如下写法
+
+```typescript
+@inject(Contribution.Provider) @named(Weapon) public weaponProvider: Contribution.Provider<Weapon>;
+
+```
+
+#### 扩展点示例
+
+```typescript
+const Waepon = Syringe.defineToken('Weapon');
+Contribution.register(GlobalContainer.register, Waepon);
+@singleton({ contrib: Weapon })
+class Shuriken implements Weapon {
+  public hit() {
+    console.log('Shuriken hit');
+  }
+}
+@transient()
+class Ninja {
+  @contrib(Weapon) public weaponProvider: Contribution.Provider<Weapon>;
+  hit() {
+    const weapons = this.weaponProvider.getContributions();
+    weapons.forEach(w => w.hit());
+  }
+}
+const module = Module(register => {
+  Contribution.register(register, Weapon);
+  register(Shuriken);
+  register(Ninja);
+});
 GlobalContainer.register(Shuriken);
-GlobalContainer.register({ token: Shuriken, useClass: Shuriken });
+GlobalContainer.register(Ninja);
+GlobalContainer.get(Ninja).hit(); // Shuriken hit
 ```
 
 ### 模块
@@ -131,32 +216,4 @@ const module = Module(register => {
 GlobalContainer.load(module);
 ```
 
-### 扩展点
-
-为了方便注册扩展点，容器提供了一组扩展的注册与使用接口。扩展点定义使用的 token 必须为 DefinedToken。
-
-```typescript
-const Waepon = Syringe.defineToken('Weapon');
-@singleton({ contrib: Weapon })
-class Shuriken implements Weapon {
-  public hit() {
-    console.log('Shuriken hit');
-  }
-}
-const module = Module(register => {
-  Contribution.register(register, Weapon);
-  register(Shuriken);
-  register(Ninja);
-});
-
-@transient()
-class Ninja {
-  @contrib(Weapon) public weapons: Weapon[];
-}
-```
-
-## 其他
-
-1. 相同 module 默认不重复加载。
-2. Contribution 可以通过多种传参形式处理缓存及是否从父组件获取。
-3. 除非通过 defineToken 声明允许多绑定，token 默认单一绑定，重复注册时进行替换操作。
+- 相同 module 默认不重复加载。
