@@ -1,6 +1,6 @@
 import type { Syringe } from '../core';
-import { Contribution } from './contribution';
 import { inject, named } from '../decorator';
+import { Provider } from './contribution-protocol';
 
 export const contrib =
   (token: Syringe.Named) =>
@@ -11,5 +11,5 @@ export const contrib =
     index?: number | undefined,
   ) => {
     named(token)(target, targetKey, index);
-    inject(Contribution.Provider)(target, targetKey, index);
+    inject(Provider)(target, targetKey, index);
   };

@@ -3,10 +3,10 @@
 import 'reflect-metadata';
 import assert from 'assert';
 import { injectable } from 'inversify';
-import { bindSingleton, bindTransient, bindLifecycle } from './inversify';
-import { Syringe } from './core';
-import { GlobalContainer } from './container';
-import { Register } from './register';
+import { bindSingleton, bindTransient, bindLifecycle } from '.';
+import { Syringe } from '../core';
+import { GlobalContainer } from '../container';
+import { Register } from '../register';
 
 const fakeContainer: Syringe.Container = {
   register: () => {},

@@ -1,15 +1,14 @@
 import assert from 'assert';
-import { GlobalContainer } from './container';
-import { injectable } from './decorator';
-import { Module } from './module';
+import { injectable, Module, GlobalContainer } from '..';
 
 describe('module', () => {
   it('#load module', () => {
     @injectable()
     class Foo {}
+    class Bar {}
     const module = Module(reg => {
       reg(Foo);
-    });
+    }).register(Bar);
     GlobalContainer.load(module);
     const foo = GlobalContainer.get(Foo);
     assert(foo instanceof Foo);
@@ -30,9 +29,7 @@ describe('module', () => {
   it('#force load module twice', () => {
     @injectable()
     class Foo {}
-    const module = Module(reg => {
-      reg(Foo);
-    });
+    const module = Module().register(Foo);
     GlobalContainer.load(module);
     GlobalContainer.load(module, true);
     try {

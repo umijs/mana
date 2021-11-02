@@ -1,6 +1,7 @@
 import type { interfaces } from 'inversify';
 import { Container } from 'inversify';
-import { Syringe, Utils } from './core';
+import { Syringe, Utils } from '../core';
+import type { InversifyContext } from './inversify-protocol';
 
 export function bindSingleton<T>(
   toBind: interfaces.BindingInSyntax<T>,
@@ -48,10 +49,7 @@ export function bindMonoToken<T>(
   return context.container.bind(tokenToIdentifier(token));
 }
 
-export type InversifyContext = {
-  container: Container;
-};
-export function isInversifyContext(data: Record<string, unknown>): data is InversifyContext {
+export function isInversifyContext(data: Record<any, any>): data is InversifyContext {
   return data && typeof data === 'object' && 'container' in data && 'inversify' in data;
 }
 

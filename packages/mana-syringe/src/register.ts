@@ -1,5 +1,5 @@
 import type { interfaces } from 'inversify';
-import type { InversifyContext } from './inversify';
+import type { InversifyContext } from './inversify/inversify-protocol';
 import {
   bindNamed,
   bindGeneralToken,

@@ -1,18 +1,12 @@
 import type { Syringe } from '../core';
-import type { ContributionProvider, ContributionProviderOption } from './interface';
+import type { Option, Provider } from './contribution-protocol';
 
-export class DefaultContributionProvider<T extends Record<string, any>>
-  implements ContributionProvider<T>
-{
-  protected option: ContributionProviderOption = { recursive: false, cache: true };
+export class DefaultContributionProvider<T extends Record<string, any>> implements Provider<T> {
+  protected option: Option = { recursive: false, cache: true };
   protected services: T[] | undefined;
   protected readonly serviceIdentifier: Syringe.Token<T>;
   protected readonly container: Syringe.Container;
-  constructor(
-    serviceIdentifier: Syringe.Token<T>,
-    container: Syringe.Container,
-    option?: ContributionProviderOption,
-  ) {
+  constructor(serviceIdentifier: Syringe.Token<T>, container: Syringe.Container, option?: Option) {
     this.container = container;
     this.serviceIdentifier = serviceIdentifier;
     if (option) {
@@ -33,7 +27,7 @@ export class DefaultContributionProvider<T extends Record<string, any>>
     return currentServices;
   }
 
-  getContributions(option: ContributionProviderOption = {}): T[] {
+  getContributions(option: Option = {}): T[] {
     const { cache, recursive } = { ...this.option, ...option };
     if (!cache || this.services === undefined) {
       this.services = this.setServices(!!recursive);

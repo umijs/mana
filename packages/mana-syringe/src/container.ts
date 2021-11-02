@@ -1,5 +1,5 @@
 import { Container as InversifyContainer } from 'inversify';
-import type { InversifyContext } from './inversify';
+import type { InversifyContext } from './inversify/inversify-protocol';
 import {
   GlobalContainer as InversifyGlobalContainer,
   namedToIdentifier,
@@ -8,16 +8,15 @@ import {
 import type { Syringe } from './core';
 import { Utils } from './core';
 import { Register } from './register';
-import type { SyringeModule } from './module';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class Container implements Syringe.Container, InversifyContext {
   static config(option: Syringe.InjectOption<void>): void {
     Register.globalConfig = option;
   }
-  protected loadedModule: number[] = [];
+  protected loadedModules: number[] = [];
   container: InversifyContainer;
-  inversify: boolean = true;
+  protected inversify: boolean = true;
   parent?: Container;
   constructor(inversifyContainer?: InversifyContainer) {
     if (inversifyContainer) {
@@ -26,10 +25,10 @@ export class Container implements Syringe.Container, InversifyContext {
       this.container = new InversifyContainer();
     }
   }
-  load(module: SyringeModule, force?: boolean): void {
-    if (force || !this.loadedModule.includes(module.id)) {
+  load(module: Syringe.Module, force?: boolean): void {
+    if (force || !this.loadedModules.includes(module.id)) {
       module.registry(this.register.bind(this), this.resolveContext());
-      this.loadedModule.push(module.id);
+      this.loadedModules.push(module.id);
     }
   }
   remove<T>(token: Syringe.Token<T>): void {
@@ -62,6 +61,8 @@ export class Container implements Syringe.Container, InversifyContext {
     child.parent = this;
     return child;
   }
+  register<T = any>(tokenOrOption: Syringe.Token<T> | Syringe.InjectOption<T>): void;
+  register<T = any>(token: Syringe.Token<T>, options: Syringe.InjectOption<T>): void;
   register<T = any>(
     token: Syringe.Token<T> | Syringe.InjectOption<T>,
     options: Syringe.InjectOption<T> = {},

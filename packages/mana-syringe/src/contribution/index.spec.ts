@@ -6,7 +6,7 @@ import { GlobalContainer } from '../container';
 import { register } from '../container';
 import { inject, singleton } from '../decorator';
 import { Contribution, contrib } from '../';
-import { DefaultContributionProvider } from './provider';
+import { DefaultContributionProvider } from './contribution-provider';
 import { Syringe } from '../core';
 
 describe('contribution', () => {
