@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { injectable, Module, GlobalContainer } from '..';
+import { injectable, Module, GlobalContainer, Syringe, singleton, contrib, Contribution } from '..';
 
 describe('module', () => {
   it('#load module', () => {
@@ -37,5 +37,21 @@ describe('module', () => {
     } catch (ex) {
       assert(ex);
     }
+  });
+
+  it('#register contribution in module', () => {
+    const FooContribution = Syringe.defineToken('FooContribution');
+    @singleton({ contrib: FooContribution })
+    class Foo {}
+    @singleton()
+    class Bar {
+      constructor(@contrib(FooContribution) public provider: Contribution.Provider<any>) {}
+    }
+    const module = Module().contribution(FooContribution).register(Foo, Bar);
+    GlobalContainer.load(module);
+    const bar = GlobalContainer.get(Bar);
+    const list = bar.provider.getContributions();
+    assert(list.length === 1);
+    assert(list.find(item => item instanceof Foo));
   });
 });
