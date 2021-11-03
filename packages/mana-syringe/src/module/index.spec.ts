@@ -14,6 +14,18 @@ describe('module', () => {
     assert(foo instanceof Foo);
   });
 
+  it('#check module', () => {
+    @injectable()
+    class Foo {}
+    class Bar {}
+    const module = Module(reg => {
+      reg(Foo);
+    }).register(Bar);
+
+    assert(Syringe.isModule(module));
+    assert(!Syringe.isModule({}));
+  });
+
   it('#load module once', () => {
     @injectable()
     class Foo {}

@@ -62,6 +62,11 @@ export namespace Syringe {
     id: number;
     registry: Registry;
   };
+
+  export function isModule(data: Record<any, any> | undefined): data is Module {
+    return !!data && typeof data === 'object' && 'id' in data && 'registry' in data;
+  }
+
   export type Container = {
     parent?: Container;
     remove: <T>(token: Syringe.Token<T>) => void;
