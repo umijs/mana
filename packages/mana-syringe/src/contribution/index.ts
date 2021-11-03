@@ -8,6 +8,6 @@ export * from './decorator';
 export namespace Contribution {
   export type Option = Protocol.Option;
   export type Provider<T extends Record<string, any>> = Protocol.Provider<T>;
-  export const Provider = Protocol.Provider;
+  export const { Provider } = Protocol;
   export const register = contributionRegister;
 }

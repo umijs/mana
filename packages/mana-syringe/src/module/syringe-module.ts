@@ -40,10 +40,11 @@ export class SyringeModule implements Syringe.Module {
     }
     return this.optionCollection;
   }
-  register<T = any>(...options: TokenOrOption<T>[]) {
+  register(...options: TokenOrOption<any>[]) {
     options.forEach(option => this.options.push(option));
     return this;
   }
+
   contribution(...tokens: Syringe.DefinedToken[]) {
     tokens.forEach(token => this.options.push(contributionInjectOption(token)));
     return this;
