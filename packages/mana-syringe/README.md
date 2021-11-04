@@ -207,12 +207,11 @@ GlobalContainer.get(Ninja).hit(); // Shuriken hit
 
 ### 模块
 
-可以通过用一组注册动作创建一个模块，方便在不同容器上下文间内加载
+可以通过用一组注册动作创建一个模块，方便在不同容器上下文间内加载, 模块的构建支持注册函数和链式调用两种方式，前面扩展点示例里的模块也可以写成如下形式：
 
 ```typescript
-const module = Module(register => {
-  register(Shuriken);
-});
+const module = Module().contribution(Weapon).register(Shuriken, Ninja);
+
 GlobalContainer.load(module);
 ```
 
