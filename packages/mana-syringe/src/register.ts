@@ -123,7 +123,7 @@ export class Register<T> {
   protected generalToken: interfaces.ServiceIdentifier<T>;
   protected option: Syringe.FormattedInjectOption<T>;
   protected context: Syringe.Container;
-  protected mutipleEnable: boolean;
+  protected mutiple: boolean;
   constructor(
     context: Syringe.Container,
     token: Syringe.UnionToken<T>,
@@ -134,7 +134,7 @@ export class Register<T> {
     this.option = option;
     this.rawToken = Utils.isNamedToken(token) ? token.token : token;
     this.named = Utils.isNamedToken(token) ? token.named : undefined;
-    this.mutipleEnable = !!this.named || Utils.isMultipleEnabled(this.rawToken);
+    this.mutiple = !!this.named || Utils.isMultipleEnabled(this.rawToken);
     this.generalToken = this.rawToken;
   }
   /**
@@ -146,14 +146,18 @@ export class Register<T> {
     if (!isInversifyContext(context)) {
       return;
     }
-    if (this.mutipleEnable) {
+    if (this.mutiple) {
       this.resolveMutilple(context);
     } else {
       this.resolveMono(context);
       if (!this.named && this.option.contrib.length > 0) {
-        this.option.contrib.forEach(contribution =>
-          bindGeneralToken(contribution, context).toService(this.generalToken),
-        );
+        this.option.contrib.forEach(contribution => {
+          if (Utils.isMultipleEnabled(contribution)) {
+            bindGeneralToken(contribution, context).toService(this.generalToken);
+          } else {
+            bindMonoToken(contribution, context).toService(this.generalToken);
+          }
+        });
       }
     }
   }

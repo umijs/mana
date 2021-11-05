@@ -166,6 +166,22 @@ describe('container', () => {
       const foo2 = GlobalContainer.get(FooSymbol);
       assert(foo1 === foo2);
     });
+    it('#contrib to mono/multi token', () => {
+      const FooSymbol = Symbol('FooSymbol');
+      const BarSymbol = Syringe.defineToken('BarSymbol');
+      register({ token: FooSymbol, useValue: FooSymbol });
+      register({ token: BarSymbol, useValue: undefined });
+      @singleton({ contrib: [FooSymbol, BarSymbol] })
+      class FooContribToMonoMulti {}
+      register(FooContribToMonoMulti);
+      const obj = GlobalContainer.get(FooContribToMonoMulti);
+      const objFoo = GlobalContainer.get(FooSymbol);
+      const barList = GlobalContainer.getAll(BarSymbol);
+      assert(obj === objFoo);
+      assert(barList.includes(objFoo));
+      assert(barList.includes(undefined));
+      assert(barList.length === 2);
+    });
     it('#remove', () => {
       @singleton()
       class Foo {}

@@ -74,7 +74,6 @@ interface {
 
 - token 可以为数组，本次绑定关系需要声明的标识，不同标识分别注册
 - contrib 可以为数组，可用于注册扩展点，也可用于注册 token 别名
-- lifecycle 生命期，参见前文
 - useClass 可以为数组，给出一个或多个类
 - useToken 可以为数组，根据 token 从容器内动态获取对象
 - useFactory 可以为数组，基于带有容器信息的上下文，给出动态获得实例的方法
@@ -106,6 +105,24 @@ GlobalContainer.register(Shuriken, {
   useClass: Shuriken,
   lifecycle: Syringe.Lifecycle.singleton,
 });
+```
+
+通过 token 注册后，每个 token 的注册关系是独立的，通过他们获取对象可以是不同的值，通过 contrib 注册的是别名关系，他们应该获取到同一个对象。不管是 token 还是 contrib，根据对多绑定的支持情况做处理。
+
+```typescript
+const Weapon = Symbol('Weapon');
+const WeaponArray = Syringe.defineToken('Weapon');
+@singleton({ contrib: Weapon })
+class Shuriken implements Weapon {
+  public hit() {
+    console.log('Shuriken hit');
+  }
+}
+GlobalContainer.register({ token: Weapon, useValue: undefined });
+GlobalContainer.register({ token: WeaponArray, useValue: undefined });
+GlobalContainer.register(Shuriken);
+GlobalContainer.get(Weapon); // Shuriken
+GlobalContainer.getAll(WeaponArray); // [undefined, Shuriken]
 ```
 
 #### 注册值
