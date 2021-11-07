@@ -1,7 +1,7 @@
 {
   "name": "mana-observable",
   "keywords": [],
-  "version": "0.1.0",
+  "version": "0.2.0",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -13,14 +13,14 @@
   ],
   "dependencies": {
     "debug": "^4.3.1",
-    "mana-common": "^0.1.0",
-    "mana-syringe": "^0.1.0"
+    "mana-common": "^0.2.0",
+    "mana-syringe": "^0.2.0"
   },
   "peerDependencies": {
     "react": ">=16.9.0"
   },
   "devDependencies": {
-    "mana-scripts": "^0.1.0"
+    "mana-scripts": "^0.2.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

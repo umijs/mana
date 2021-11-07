@@ -1,7 +1,7 @@
 {
   "name": "mana-syringe",
   "keywords": [],
-  "version": "0.1.0",
+  "version": "0.2.0",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -16,7 +16,7 @@
     "inversify": "^5.0.1"
   },
   "devDependencies": {
-    "mana-scripts": "^0.1.0"
+    "mana-scripts": "^0.2.0"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",

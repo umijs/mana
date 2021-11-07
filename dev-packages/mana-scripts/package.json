@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "mana-scripts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "NPM scripts for Mana packages.",
   "bin": {
     "manarun": "mana-run.js",
