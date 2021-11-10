@@ -174,8 +174,8 @@ class Ninja {
 #### 扩展点的定义与注册
 
 ```typescript
-const Waepon = Syringe.defineToken('Weapon');
-Contribution.register(GlobalContainer.register, Waepon);
+const Weapon = Syringe.defineToken('Weapon');
+Contribution.register(GlobalContainer.register, Weapon);
 ```
 
 #### 扩展服务 Contribution.Provider
@@ -196,8 +196,8 @@ Contribution.register(GlobalContainer.register, Waepon);
 #### 扩展点示例
 
 ```typescript
-const Waepon = Syringe.defineToken('Weapon');
-Contribution.register(GlobalContainer.register, Waepon);
+const Weapon = Syringe.defineToken('Weapon');
+Contribution.register(GlobalContainer.register, Weapon);
 @singleton({ contrib: Weapon })
 class Shuriken implements Weapon {
   public hit() {
