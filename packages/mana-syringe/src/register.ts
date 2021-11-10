@@ -7,10 +7,8 @@ import {
   bindLifecycle,
   isInversifyContext,
 } from './inversify';
-import { Utils, Syringe, getLogger } from './core';
+import { Utils, Syringe } from './core';
 import { OptionSymbol } from './side-option';
-
-const log = getLogger('register');
 
 export function toRegistryOption<P>(
   options: Syringe.InjectOption<P>,
@@ -22,9 +20,6 @@ export function toRegistryOption<P>(
   const contrib = Utils.maybeArrayToArray(options.contrib);
   const lifecycle = options.lifecycle || Syringe.Lifecycle.transient;
 
-  if (contrib.length > 0 && lifecycle !== Syringe.Lifecycle.singleton) {
-    log('Contrib should use singleton scope', token[0]);
-  }
   const generalOption: Syringe.FormattedInjectOption<P> = {
     token,
     useClass,
@@ -104,7 +99,6 @@ export class Register<T> {
       parsedOption.useFactory.length === 0 &&
       !('useValue' in parsedOption)
     ) {
-      log('No value to register for token:', parsedOption.token);
       return;
     }
 
