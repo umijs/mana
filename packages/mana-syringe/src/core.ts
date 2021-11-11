@@ -2,11 +2,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import 'reflect-metadata';
-import { debug } from 'debug';
-
-const log = debug('[mana-syringe]');
-
-export const getLogger = log.extend;
 
 export type TokenOption = {
   multiple?: boolean;
