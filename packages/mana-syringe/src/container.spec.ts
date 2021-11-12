@@ -2,6 +2,8 @@ import assert from 'assert';
 import { register, GlobalContainer, Container } from './container';
 import { singleton, transient, injectable } from './decorator';
 import { Syringe } from './core';
+import { contrib, Contribution } from './contribution';
+import { Module } from './module';
 
 describe('container', () => {
   describe('default', () => {
@@ -193,6 +195,55 @@ describe('container', () => {
       } catch (ex) {
         assert(true);
       }
+    });
+    it('#remove contrib', () => {
+      const FooSymbol = Syringe.defineToken('FooSymbol');
+      @singleton({ contrib: FooSymbol })
+      class FooContribution {}
+      @singleton({ contrib: FooSymbol })
+      class BarContribution {}
+      register(FooContribution);
+      register(BarContribution);
+      const contribs = GlobalContainer.getAll(FooSymbol);
+      assert(contribs.length === 2);
+      assert(contribs[0] instanceof FooContribution);
+      GlobalContainer.remove(FooSymbol);
+      assert(!GlobalContainer.isBound(FooSymbol));
+      register(FooContribution);
+      const emptyContribs = GlobalContainer.getAll(FooSymbol);
+      assert(emptyContribs.length === 1);
+    });
+
+    it('#remove contrib in module', () => {
+      const FooSymbol = Syringe.defineToken('FooSymbol');
+      @singleton({ contrib: FooSymbol })
+      class FooContribution {}
+      @singleton({ contrib: FooSymbol })
+      class BarContribution {}
+
+      @singleton()
+      class Foo {
+        constructor(@contrib(FooSymbol) public provider: Contribution.Provider<Record<any, any>>) {}
+      }
+      // const fooModule = Module().contribution(FooSymbol).register(Foo, FooContribution);
+      const fooModule = Module(reg => {
+        Contribution.register(reg, FooSymbol, { cache: false });
+        reg(Foo);
+        reg(FooContribution);
+      });
+      const barModule = Module((reg, ctx) => {
+        ctx.container.remove(FooSymbol);
+        reg(BarContribution);
+      });
+      GlobalContainer.load(fooModule);
+      const foo = GlobalContainer.get(Foo);
+      const contribs = foo.provider.getContributions();
+      assert(contribs.length === 1);
+      assert(contribs[0] instanceof FooContribution);
+      GlobalContainer.load(barModule);
+      const newContribs = foo.provider.getContributions({ cache: false });
+      assert(newContribs.length === 1);
+      assert(newContribs[0] instanceof BarContribution);
     });
   });
   describe('basic', () => {
