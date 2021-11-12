@@ -15,9 +15,6 @@
   "dependencies": {
     "inversify": "^5.0.1"
   },
-  "devDependencies": {
-    "mana-scripts": "^0.2.0"
-  },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "lint": "manarun lint",
