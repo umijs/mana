@@ -19,9 +19,6 @@
   "peerDependencies": {
     "react": ">=16.9.0"
   },
-  "devDependencies": {
-    "mana-scripts": "^0.2.0"
-  },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "lint": "manarun lint",

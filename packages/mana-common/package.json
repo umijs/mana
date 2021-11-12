@@ -14,9 +14,6 @@
   "dependencies": {
     "debug": "^4.3.1"
   },
-  "devDependencies": {
-    "mana-scripts": "^0.2.0"
-  },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "lint": "manarun lint",
