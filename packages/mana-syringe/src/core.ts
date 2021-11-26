@@ -130,14 +130,14 @@ export namespace Syringe {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export namespace Utils {
-  export function maybeArrayToArray<T>(maybeArray: Syringe.MaybeArray<T> | undefined): T[] {
-    if (!(maybeArray instanceof Array)) {
-      if (maybeArray !== undefined) {
-        return [maybeArray];
-      }
+  export function toArray<T>(maybeArray: Syringe.MaybeArray<T> | undefined): T[] {
+    if (Array.isArray(maybeArray)) {
+      return maybeArray;
+    }
+    if (maybeArray === undefined) {
       return [];
     }
-    return maybeArray;
+    return [maybeArray];
   }
   export function isClass(
     data?: string | symbol | Record<string, any>,

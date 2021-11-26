@@ -13,11 +13,11 @@ import { OptionSymbol } from './side-option';
 export function toRegistryOption<P>(
   options: Syringe.InjectOption<P>,
 ): Syringe.FormattedInjectOption<P> {
-  const token = Utils.maybeArrayToArray(options.token);
-  const useClass = Utils.maybeArrayToArray(options.useClass);
-  const useDynamic = Utils.maybeArrayToArray(options.useDynamic);
-  const useFactory = Utils.maybeArrayToArray(options.useFactory);
-  const contrib = Utils.maybeArrayToArray(options.contrib);
+  const token = Utils.toArray(options.token);
+  const useClass = Utils.toArray(options.useClass);
+  const useDynamic = Utils.toArray(options.useDynamic);
+  const useFactory = Utils.toArray(options.useFactory);
+  const contrib = Utils.toArray(options.contrib);
   const lifecycle = options.lifecycle || Syringe.Lifecycle.transient;
 
   const generalOption: Syringe.FormattedInjectOption<P> = {
@@ -58,7 +58,7 @@ export class Register<T> {
         if (!option.useClass) {
           option.useClass = [target];
         } else {
-          const classes = Utils.maybeArrayToArray(option.useClass);
+          const classes = Utils.toArray(option.useClass);
           classes.unshift(target);
           option.useClass = classes;
         }
@@ -76,7 +76,7 @@ export class Register<T> {
       if (!mixedOption.token) {
         mixedOption.token = [target];
       } else {
-        const tokens = Utils.maybeArrayToArray(mixedOption.token);
+        const tokens = Utils.toArray(mixedOption.token);
         tokens.unshift(target);
         mixedOption.token = tokens;
       }
