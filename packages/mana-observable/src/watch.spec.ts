@@ -76,6 +76,7 @@ describe('watch', () => {
   });
 
   it('#invalid watch', () => {
+    class A {}
     class Foo {
       @prop() name?: string;
       constructor() {
@@ -83,7 +84,10 @@ describe('watch', () => {
       }
     }
     const foo = new Foo();
+    const a = new A();
     const toDispose = (watch as any)(foo, 'name');
+    const toDisposeA = watch(a, () => {});
     assert(toDispose === Disposable.NONE);
+    assert(toDisposeA === Disposable.NONE);
   });
 });

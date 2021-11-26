@@ -3,10 +3,9 @@
 import { debug } from 'debug';
 
 export namespace ReactiveSymbol {
-  export const Config = Symbol('Config');
   export const Trigger = Symbol('Trigger');
-  export const Tracker = Symbol('PropertyTracker');
-  export const TrackableProperties = Symbol('TraceableProperties');
+  export const Tracker = Symbol('Tracker');
+  export const ObservableProperties = Symbol('ObservableProperties');
   export const Tracked = Symbol('Tracked');
   export const ObjectSelf = Symbol('ObjectSelf');
 }
