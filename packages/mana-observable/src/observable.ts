@@ -87,7 +87,7 @@ export function prop(): propDecorator {
     log('define', target, propertyKey, propertyType);
 
     // Mark properties on prototypes as traceable properties
-    Reflect.defineMetadata(ReactiveSymbol.TrackableProperty, true, target, propertyKey);
+    Reflect.defineMetadata(ReactiveSymbol.Tracked, true, target, propertyKey);
     if (!Reflect.hasOwnMetadata(ReactiveSymbol.TrackableProperties, target)) {
       let initailProperties = [];
       if (Reflect.hasMetadata(ReactiveSymbol.TrackableProperties, target)) {

@@ -6,8 +6,6 @@ export namespace ReactiveSymbol {
   export const Config = Symbol('Config');
   export const Trigger = Symbol('Trigger');
   export const Tracker = Symbol('PropertyTracker');
-  export const TrackedObjectSelf = Symbol('TrackedObjectSelf');
-  export const TrackableProperty = Symbol('TraceableProperty');
   export const TrackableProperties = Symbol('TraceableProperties');
   export const Tracked = Symbol('Tracked');
   export const ObjectSelf = Symbol('ObjectSelf');
