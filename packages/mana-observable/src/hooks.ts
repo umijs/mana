@@ -20,7 +20,7 @@ function reactiveObject<T extends Record<string, any>>(
         return obj;
       }
       if (
-        Reflect.hasMetadata(ReactiveSymbol.TrackableProperty, obj, property) &&
+        Reflect.hasMetadata(ReactiveSymbol.Tracked, obj, property) &&
         typeof property === 'string'
       ) {
         const reactionDispose: Disposable = Reflect.getMetadata(property, dispatch);

@@ -54,19 +54,19 @@ export class Tracker implements Disposable {
   notify(target: any, prop?: any): void {
     log('notify', target, prop, this);
     this.changedEmitter.fire({ target, prop });
-    if (prop !== ReactiveSymbol.TrackedObjectSelf) {
+    if (prop) {
       Tracker.trigger(target);
     }
   }
 
-  static trigger(target: any, prop: any = ReactiveSymbol.TrackedObjectSelf): void {
+  static trigger(target: any, prop?: any): void {
     const tracker: Tracker | undefined = Reflect.getMetadata(ReactiveSymbol.Tracker, target, prop);
     log('trigger', target, prop, tracker);
     if (tracker) {
       tracker.notify(target, prop);
     }
   }
-  static getOrCreate(target: any, prop: any = ReactiveSymbol.TrackedObjectSelf): Tracker {
+  static getOrCreate(target: any, prop?: any): Tracker {
     const exist = Reflect.getMetadata(ReactiveSymbol.Tracker, target, prop);
     if (!exist || exist.disposed) {
       const tracker = new Tracker();
@@ -77,7 +77,7 @@ export class Tracker implements Disposable {
     return exist;
   }
   static find(target: any, prop?: any): Tracker | undefined {
-    if (!Reflect.hasMetadata(ReactiveSymbol.TrackableProperty, target, prop)) {
+    if (!Reflect.hasMetadata(ReactiveSymbol.Tracked, target, prop)) {
       return undefined;
     }
     return Tracker.getOrCreate(target, prop);
