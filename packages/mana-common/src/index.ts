@@ -7,3 +7,4 @@ export * from './promise-util';
 export * from './priority';
 export * from './types-util';
 export * from './types';
+export * from './objects';
