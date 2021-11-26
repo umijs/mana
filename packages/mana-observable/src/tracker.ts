@@ -4,19 +4,20 @@ import type { Reaction } from './core';
 import { ReactiveSymbol, logger } from './core';
 import { Emitter } from 'mana-common';
 import type { Disposable } from 'mana-common';
+import { isTracked } from './utils';
 
 const log = logger.extend('tracker');
 
-export type Tracked = {
+export type TrackedObject = {
   [ReactiveSymbol.ObjectSelf]: Record<string, any>;
 };
 
-export function isTracked(target: Record<string, any>): target is Tracked {
+export function isTrackedObject(target: Record<string, any>): target is TrackedObject {
   return target && typeof target === 'object' && (target as any)[ReactiveSymbol.ObjectSelf];
 }
 
 export function getOrigin<T extends Record<string, any>>(target: T): T {
-  if (isTracked(target)) {
+  if (isTrackedObject(target)) {
     return (target as any)[ReactiveSymbol.ObjectSelf];
   }
   return target;
@@ -77,7 +78,7 @@ export class Tracker implements Disposable {
     return exist;
   }
   static find(target: any, prop?: any): Tracker | undefined {
-    if (!Reflect.hasMetadata(ReactiveSymbol.Tracked, target, prop)) {
+    if (!isTracked(target, prop)) {
       return undefined;
     }
     return Tracker.getOrCreate(target, prop);

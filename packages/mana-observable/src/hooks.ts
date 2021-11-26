@@ -19,23 +19,22 @@ function reactiveObject<T extends Record<string, any>>(
       if (property === ReactiveSymbol.ObjectSelf) {
         return obj;
       }
-      if (
-        Reflect.hasMetadata(ReactiveSymbol.Tracked, obj, property) &&
-        typeof property === 'string'
-      ) {
+      const tracker = Tracker.find(obj, property);
+      if (tracker && typeof property === 'string') {
         const reactionDispose: Disposable = Reflect.getMetadata(property, dispatch);
         if (reactionDispose) {
           reactionDispose.dispose();
         }
-        const tracker = Tracker.getOrCreate(obj, property);
-        const toDispose = tracker.once(() => {
-          log('dispatch', property, obj[property]);
-          dispatch({
-            key: property as keyof T,
-            value: obj[property],
+        if (tracker) {
+          const toDispose = tracker.once(() => {
+            log('dispatch', property, obj[property]);
+            dispatch({
+              key: property as keyof T,
+              value: obj[property],
+            });
           });
-        });
-        Reflect.defineMetadata(property, toDispose, dispatch);
+          Reflect.defineMetadata(property, toDispose, dispatch);
+        }
       }
       const descriptor = getPropertyDescriptor(obj, property);
       let value;

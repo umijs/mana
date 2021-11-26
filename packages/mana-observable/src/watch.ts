@@ -6,7 +6,10 @@ console.warn = () => {};
 
 function watchAll<T>(target: T, callback: Reaction): Disposable {
   const data = getOrigin(target);
-  const tracker = Tracker.getOrCreate(data);
+  const tracker = Tracker.find(data);
+  if (!tracker) {
+    return Disposable.NONE;
+  }
   const props: string[] = Object.keys(data);
   if (props) {
     props.forEach(prop => Tracker.find(target, prop));

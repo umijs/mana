@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { Tracker } from './tracker';
 import { ReactiveSymbol, logger } from './core';
 import { reactiveArray, reactiveMap, reactivePlainObject } from './reactive';
+import { markTracked } from './utils';
 
 const log = logger.extend('observable');
 
@@ -29,7 +30,7 @@ export const dataTrans = (target: any, propertyKey: string, propertyType: any, v
 
 export function observable(target: any): void {
   const trackableProperties: string[] | undefined = Reflect.getMetadata(
-    ReactiveSymbol.TrackableProperties,
+    ReactiveSymbol.ObservableProperties,
     target,
   );
   if (
@@ -66,7 +67,7 @@ export function observable(target: any): void {
         });
       }
     });
-    Reflect.defineMetadata(ReactiveSymbol.Tracked, true, target);
+    markTracked(target);
   }
 }
 
@@ -87,20 +88,20 @@ export function prop(): propDecorator {
     log('define', target, propertyKey, propertyType);
 
     // Mark properties on prototypes as traceable properties
-    Reflect.defineMetadata(ReactiveSymbol.Tracked, true, target, propertyKey);
-    if (!Reflect.hasOwnMetadata(ReactiveSymbol.TrackableProperties, target)) {
+    markTracked(target, propertyKey);
+    if (!Reflect.hasOwnMetadata(ReactiveSymbol.ObservableProperties, target)) {
       let initailProperties = [];
-      if (Reflect.hasMetadata(ReactiveSymbol.TrackableProperties, target)) {
-        initailProperties = Reflect.getMetadata(ReactiveSymbol.TrackableProperties, target);
+      if (Reflect.hasMetadata(ReactiveSymbol.ObservableProperties, target)) {
+        initailProperties = Reflect.getMetadata(ReactiveSymbol.ObservableProperties, target);
       }
       Reflect.defineMetadata(
-        ReactiveSymbol.TrackableProperties,
+        ReactiveSymbol.ObservableProperties,
         [...initailProperties, propertyKey],
         target,
       );
     } else {
       const trackableProperties: string[] = Reflect.getOwnMetadata(
-        ReactiveSymbol.TrackableProperties,
+        ReactiveSymbol.ObservableProperties,
         target,
       );
       trackableProperties.push(propertyKey);
