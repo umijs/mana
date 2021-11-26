@@ -5,6 +5,7 @@ import { ReactiveSymbol, logger } from './core';
 import type { Observable } from './core';
 import { getOrigin, Tracker } from './tracker';
 import type { Disposable } from 'mana-common';
+import { getPropertyDescriptor } from 'mana-common';
 
 const log = logger.extend('hooks');
 
@@ -36,12 +37,10 @@ function reactiveObject<T extends Record<string, any>>(
         });
         Reflect.defineMetadata(property, toDispose, dispatch);
       }
-      const ownDesc = Reflect.getOwnPropertyDescriptor(obj, property);
-      const prototype = Object.getPrototypeOf(obj);
-      const protoDesc = prototype && Reflect.getOwnPropertyDescriptor(prototype, property);
+      const descriptor = getPropertyDescriptor(obj, property);
       let value;
-      if (!ownDesc && protoDesc?.get) {
-        value = protoDesc.get.call(proxy);
+      if (descriptor?.get) {
+        value = descriptor.get.call(proxy);
       } else {
         value = target[property];
       }
