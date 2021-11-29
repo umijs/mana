@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 import { ObservableContext } from './context';
-import { ReactiveSymbol, logger } from './core';
+import { ObservableSymbol } from './core';
 import type { Observable } from './core';
 import { getOrigin, Tracker } from './tracker';
 import type { Disposable } from 'mana-common';
 import { getPropertyDescriptor } from 'mana-common';
-
-const log = logger.extend('hooks');
 
 function reactiveObject<T extends Record<string, any>>(
   object: T,
@@ -16,7 +14,7 @@ function reactiveObject<T extends Record<string, any>>(
   const obj = getOrigin(object);
   const proxy = new Proxy(obj, {
     get(target: any, property: string | symbol): any {
-      if (property === ReactiveSymbol.ObjectSelf) {
+      if (property === ObservableSymbol.ObjectSelf) {
         return obj;
       }
       const tracker = Tracker.find(obj, property);
@@ -27,7 +25,6 @@ function reactiveObject<T extends Record<string, any>>(
         }
         if (tracker) {
           const toDispose = tracker.once(() => {
-            log('dispatch', property, obj[property]);
             dispatch({
               key: property as keyof T,
               value: obj[property],
@@ -61,10 +58,10 @@ const reducer = <T>(state: Partial<T>, part: Action<T>) => {
 };
 
 export function useObserve<T extends Record<string, any>>(obj: T): T {
-  const [state, dispatch] = React.useReducer<
-    (prevState: Partial<T>, action: Action<T>) => Partial<T>
-  >(reducer, {});
-  log('update', state, obj);
+  const [, dispatch] = React.useReducer<(prevState: Partial<T>, action: Action<T>) => Partial<T>>(
+    reducer,
+    {},
+  );
   if (!Reflect.hasMetadata(dispatch, obj)) {
     const proxy = reactiveObject(obj, dispatch);
     Reflect.defineMetadata(dispatch, proxy, obj);

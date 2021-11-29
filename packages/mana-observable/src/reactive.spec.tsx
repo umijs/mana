@@ -5,9 +5,9 @@ import 'react';
 import assert from 'assert';
 import { prop, observable } from './observable';
 import { defaultObservableContext } from './context';
-import { ReactiveSymbol } from './core';
+import { ObservableSymbol } from './core';
 import { GlobalContainer } from 'mana-syringe';
-import { watch } from './watch';
+import { Tracker } from './tracker';
 
 describe('reactive', () => {
   defaultObservableContext.config({
@@ -21,10 +21,10 @@ describe('reactive', () => {
       }
     }
     const instanceArray = new ClassArray();
-    assert((instanceArray.list as any)[ReactiveSymbol.ObjectSelf]);
+    assert((instanceArray.list as any)[ObservableSymbol.ObjectSelf]);
   });
 
-  it('#reactive map', done => {
+  it('#reactive map', () => {
     class Foo {
       @prop() map: Map<string, string> = new Map();
       constructor() {
@@ -32,14 +32,55 @@ describe('reactive', () => {
       }
     }
     const foo = new Foo();
+    assert((foo.map as any)[ObservableSymbol.ObjectSelf]);
+  });
+
+  it('#reactive plain object', () => {
+    class Foo {
+      @prop() map: Record<string, string> = {};
+      constructor() {
+        observable(this);
+      }
+    }
+    const foo = new Foo();
+    assert((foo.map as any)[ObservableSymbol.ObjectSelf]);
+  });
+
+  it('#reactive array changed', () => {
+    class ClassArray {
+      @prop() list: string[] = [];
+      constructor() {
+        observable(this);
+      }
+    }
+    const instanceArray = new ClassArray();
+    const tracker = Tracker.find(instanceArray, 'list');
     let changedTimes = 0;
-    watch(foo, () => {
+    tracker?.changed(() => {
+      changedTimes += 1;
+    });
+    assert((instanceArray.list as any)[ObservableSymbol.ObjectSelf]);
+    instanceArray.list.push('a');
+    instanceArray.list.pop();
+    assert(instanceArray.list.length === 0);
+    assert(changedTimes === 3);
+  });
+  it('#reactive map changed', done => {
+    class Foo {
+      @prop() map: Map<string, string> = new Map();
+      constructor() {
+        observable(this);
+      }
+    }
+    const foo = new Foo();
+    const tracker = Tracker.find(foo, 'map');
+    let changedTimes = 0;
+    tracker?.changed(() => {
       changedTimes += 1;
       if (changedTimes === 4) {
         done();
       }
     });
-    assert((foo.map as any)[ReactiveSymbol.ObjectSelf]);
     foo.map.set('a', 'a');
     const aValue = foo.map.get('a');
     assert(aValue === 'a');
@@ -49,7 +90,7 @@ describe('reactive', () => {
     foo.map.clear();
   });
 
-  it('#reactive plain object', done => {
+  it('#reactive plain object changed', done => {
     class Foo {
       @prop() map: Record<string, string> = {};
       constructor() {
@@ -58,13 +99,15 @@ describe('reactive', () => {
     }
     const foo = new Foo();
     let changedTimes = 0;
-    watch(foo, () => {
+    const tracker = Tracker.find(foo, 'map');
+
+    tracker?.changed(() => {
       changedTimes += 1;
       if (changedTimes === 3) {
         done();
       }
     });
-    assert((foo.map as any)[ReactiveSymbol.ObjectSelf]);
+    assert((foo.map as any)[ObservableSymbol.ObjectSelf]);
     foo.map.a = 'a';
     assert(foo.map.a === 'a');
     foo.map.b = 'b';

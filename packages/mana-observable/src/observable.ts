@@ -1,45 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { Tracker } from './tracker';
-import { ReactiveSymbol, logger } from './core';
+import { ObservableSymbol } from './core';
 import { reactiveArray, reactiveMap, reactivePlainObject } from './reactive';
-import { markTracked } from './utils';
-
-const log = logger.extend('observable');
+import type { DesignType } from './utils';
+import { setConstructorProperties } from './utils';
+import {
+  markObservable,
+  getObservableProperties,
+  getDesignType,
+  setObservableProperty,
+  isPlainObject,
+} from './utils';
 
 type propDecorator = (target: Record<string, any>, propertyKey: string) => void;
 
-export function isPlainObject(obj: any): boolean {
-  return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-export const dataTrans = (target: any, propertyKey: string, propertyType: any, value: any) => {
+export const dataTrans = (
+  target: any,
+  propertyKey: string,
+  propertyType: DesignType,
+  value: any,
+) => {
   if (value === undefined) return value;
   if (!value) return value;
-  if (propertyType === Array && !value[ReactiveSymbol.ObjectSelf]) {
+  if (propertyType === Array && !value[ObservableSymbol.ObjectSelf]) {
     return reactiveArray(value, target, propertyKey);
   }
-  if (propertyType === Map && !value[ReactiveSymbol.ObjectSelf]) {
+  if (propertyType === Map && !value[ObservableSymbol.ObjectSelf]) {
     return reactiveMap(value, target, propertyKey);
   }
-  if (propertyType === Object && !value[ReactiveSymbol.ObjectSelf] && isPlainObject(value)) {
+  if (propertyType === Object && !value[ObservableSymbol.ObjectSelf] && isPlainObject(value)) {
     return reactivePlainObject(value, target, propertyKey);
   }
   return value;
 };
 
 export function observable(target: any): void {
-  const trackableProperties: string[] | undefined = Reflect.getMetadata(
-    ReactiveSymbol.ObservableProperties,
-    target,
-  );
-  if (
-    // TODO: Avoid redefinition
-    trackableProperties &&
-    trackableProperties.length > 0
-  ) {
+  setConstructorProperties(target);
+  const trackableProperties = getObservableProperties(target);
+  if (trackableProperties && trackableProperties.length > 0) {
     trackableProperties.forEach(propertyKey => {
-      const propertyType = Reflect.getMetadata('design:type', target, propertyKey);
+      const propertyType = getDesignType(target, propertyKey);
       const initialValue = dataTrans(target, propertyKey, propertyType, target[propertyKey]);
       Reflect.defineMetadata(propertyKey, initialValue, target);
       // property getter
@@ -49,7 +50,6 @@ export function observable(target: any): void {
       };
       // property setter
       const setter = function setter(this: any, val: any): void {
-        log('setter', target, propertyKey, val);
         const value = dataTrans(target, propertyKey, propertyType, val);
         const oldValue = Reflect.getMetadata(propertyKey, target);
         Reflect.defineMetadata(propertyKey, value, target);
@@ -67,44 +67,15 @@ export function observable(target: any): void {
         });
       }
     });
-    markTracked(target);
+    markObservable(target);
   }
 }
-
+/**
+ * Define observable property
+ */
 export function prop(): propDecorator {
   return (target: Record<string, any>, propertyKey: string) => {
-    // number → Number
-    // string → String
-    // boolean → Boolean
-    // any → Object
-    // void → undefined
-    // Array → Array
-    // Tuple → Array
-    // class → constructor
-    // Enum → Number
-    // ()=>{} → Function
-    // others(interface ...) → Object
-    const propertyType = Reflect.getMetadata('design:type', target, propertyKey);
-    log('define', target, propertyKey, propertyType);
-
-    // Mark properties on prototypes as traceable properties
-    markTracked(target, propertyKey);
-    if (!Reflect.hasOwnMetadata(ReactiveSymbol.ObservableProperties, target)) {
-      let initailProperties = [];
-      if (Reflect.hasMetadata(ReactiveSymbol.ObservableProperties, target)) {
-        initailProperties = Reflect.getMetadata(ReactiveSymbol.ObservableProperties, target);
-      }
-      Reflect.defineMetadata(
-        ReactiveSymbol.ObservableProperties,
-        [...initailProperties, propertyKey],
-        target,
-      );
-    } else {
-      const trackableProperties: string[] = Reflect.getOwnMetadata(
-        ReactiveSymbol.ObservableProperties,
-        target,
-      );
-      trackableProperties.push(propertyKey);
-    }
+    markObservable(target, propertyKey);
+    setObservableProperty(target, propertyKey);
   };
 }
