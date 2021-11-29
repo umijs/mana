@@ -1,6 +1,11 @@
 {
   "name": "mana-syringe",
-  "keywords": [],
+  "keywords": [
+    "mana",
+    "syringe",
+    "inversify"
+  ],
+  "description": "IoC library for mana, easily to use.",
   "version": "0.2.2",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",

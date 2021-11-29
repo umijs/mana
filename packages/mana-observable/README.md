@@ -1,5 +1,7 @@
 # mana-observable
 
+Simple class property decorator that makes the class properties observable and can be easily used with React.
+
 [![NPM version](https://img.shields.io/npm/v/mana-observable.svg?style=flat)](https://npmjs.org/package/mana-observable) [![NPM downloads](https://img.shields.io/npm/dm/mana-observable.svg?style=flat)](https://npmjs.org/package/mana-observable)
 
 ## 功能
