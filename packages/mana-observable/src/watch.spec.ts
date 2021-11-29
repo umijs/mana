@@ -7,7 +7,7 @@ import { watch } from './watch';
 import { Disposable } from 'mana-common';
 
 describe('watch', () => {
-  it('#prop watch', done => {
+  it('#watch prop', done => {
     class Foo {
       @prop() name?: string;
       @prop() name1?: string;
@@ -26,7 +26,7 @@ describe('watch', () => {
     });
     foo.name = newName;
   });
-  it('#prop object', done => {
+  it('#watch object', done => {
     class Foo {
       @prop() name?: string;
       @prop() info?: string;

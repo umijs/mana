@@ -1,26 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import type { Reaction } from './core';
-import { ReactiveSymbol, logger } from './core';
+import { ObservableSymbol } from './core';
 import { Emitter } from 'mana-common';
 import type { Disposable } from 'mana-common';
-import { isTracked } from './utils';
-
-const log = logger.extend('tracker');
+import { isObservable } from './utils';
 
 export type TrackedObject = {
-  [ReactiveSymbol.ObjectSelf]: Record<string, any>;
+  [ObservableSymbol.ObjectSelf]: Record<string, any>;
 };
 
 export function isTrackedObject(target: Record<string, any>): target is TrackedObject {
-  return target && typeof target === 'object' && (target as any)[ReactiveSymbol.ObjectSelf];
+  return target && typeof target === 'object' && (target as any)[ObservableSymbol.ObjectSelf];
 }
 
 export function getOrigin<T extends Record<string, any>>(target: T): T {
   if (isTrackedObject(target)) {
-    return (target as any)[ReactiveSymbol.ObjectSelf];
+    return (target as any)[ObservableSymbol.ObjectSelf];
   }
   return target;
+}
+
+function setTracker(tracker: Tracker, obj: Record<string, any>, property?: string | symbol) {
+  if (property === undefined) {
+    Reflect.defineMetadata(ObservableSymbol.Tracker, tracker, obj);
+  } else {
+    Reflect.defineMetadata(ObservableSymbol.Tracker, tracker, obj, property);
+  }
+}
+
+function getTracker(obj: Record<string, any>, property?: string | symbol): Tracker | undefined {
+  if (property === undefined) {
+    return Reflect.getMetadata(ObservableSymbol.Tracker, obj);
+  } else {
+    return Reflect.getMetadata(ObservableSymbol.Tracker, obj, property);
+  }
 }
 
 export interface TrackInfo<T = any> {
@@ -46,14 +60,12 @@ export class Tracker implements Disposable {
   once(trigger: Reaction): Disposable {
     const toDispose = this.changed(e => {
       trigger(e.target, e.prop);
-      log('once trigger', e, this);
       toDispose.dispose();
     });
     return toDispose;
   }
 
   notify(target: any, prop?: any): void {
-    log('notify', target, prop, this);
     this.changedEmitter.fire({ target, prop });
     if (prop) {
       Tracker.trigger(target);
@@ -61,24 +73,22 @@ export class Tracker implements Disposable {
   }
 
   static trigger(target: any, prop?: any): void {
-    const tracker: Tracker | undefined = Reflect.getMetadata(ReactiveSymbol.Tracker, target, prop);
-    log('trigger', target, prop, tracker);
-    if (tracker) {
-      tracker.notify(target, prop);
+    const exist = getTracker(target, prop);
+    if (exist) {
+      exist.notify(target, prop);
     }
   }
   static getOrCreate(target: any, prop?: any): Tracker {
-    const exist = Reflect.getMetadata(ReactiveSymbol.Tracker, target, prop);
+    const exist = getTracker(target, prop);
     if (!exist || exist.disposed) {
       const tracker = new Tracker();
-      log('create tracker', target, prop, tracker);
-      Reflect.defineMetadata(ReactiveSymbol.Tracker, tracker, target, prop);
+      setTracker(tracker, target, prop);
       return tracker;
     }
     return exist;
   }
   static find(target: any, prop?: any): Tracker | undefined {
-    if (!isTracked(target, prop)) {
+    if (!isObservable(target, prop)) {
       return undefined;
     }
     return Tracker.getOrCreate(target, prop);

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Tracker } from './tracker';
-import { ReactiveSymbol } from './core';
+import { ObservableSymbol } from './core';
 
 export function reactiveArray(obj: any[], targetInstance: any, property: any): void {
   return new Proxy(obj, {
     get(self: any, prop: string | symbol): any {
-      if (prop === ReactiveSymbol.ObjectSelf) {
+      if (prop === ObservableSymbol.ObjectSelf) {
         return self;
       }
       return Reflect.get(self, prop);
@@ -22,7 +22,7 @@ export function reactiveArray(obj: any[], targetInstance: any, property: any): v
 export function reactivePlainObject(obj: any[], targetInstance: any, property: any): void {
   return new Proxy(obj, {
     get(self: any, prop: string | symbol): any {
-      if (prop === ReactiveSymbol.ObjectSelf) {
+      if (prop === ObservableSymbol.ObjectSelf) {
         return self;
       }
       return Reflect.get(self, prop);
@@ -43,7 +43,7 @@ export function reactivePlainObject(obj: any[], targetInstance: any, property: a
 export function reactiveMap(obj: Map<any, any>, targetInstance: any, property: any): void {
   return new Proxy(obj, {
     get(self: any, prop: string | symbol): any {
-      if (prop === ReactiveSymbol.ObjectSelf) {
+      if (prop === ObservableSymbol.ObjectSelf) {
         return self;
       }
       if (prop === 'set') {

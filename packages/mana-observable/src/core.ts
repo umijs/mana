@@ -1,16 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { debug } from 'debug';
-
-export namespace ReactiveSymbol {
-  export const Trigger = Symbol('Trigger');
+export namespace ObservableSymbol {
   export const Tracker = Symbol('Tracker');
+  export const Observable = Symbol('Observable');
   export const ObservableProperties = Symbol('ObservableProperties');
-  export const Tracked = Symbol('Tracked');
   export const ObjectSelf = Symbol('ObjectSelf');
 }
-
-export const logger = debug('[mana-observable]');
 
 export type Newable<T> = new (...args: any[]) => T;
 
