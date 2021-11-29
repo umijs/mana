@@ -1,6 +1,10 @@
 {
   "name": "mana-common",
-  "keywords": [],
+  "description": "Common utils for mana",
+  "keywords": [
+    "mana",
+    "common"
+  ],
   "version": "0.2.2",
   "typings": "dist/index.d.ts",
   "module": "dist/index.esm.js",

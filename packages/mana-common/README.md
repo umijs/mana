@@ -1,5 +1,7 @@
 # mana-common
 
+Common utils for mana.
+
 [![NPM version](https://img.shields.io/npm/v/mana-common.svg?style=flat)](https://npmjs.org/package/mana-common) [![NPM downloads](https://img.shields.io/npm/dm/mana-common.svg?style=flat)](https://npmjs.org/package/mana-common)
 
 ## 安装
