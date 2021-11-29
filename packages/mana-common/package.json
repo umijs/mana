@@ -11,9 +11,7 @@
     "dist",
     "src"
   ],
-  "dependencies": {
-    "debug": "^4.3.1"
-  },
+  "dependencies": {},
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "lint": "manarun lint",
