@@ -12,7 +12,6 @@
     "src"
   ],
   "dependencies": {
-    "debug": "^4.3.1",
     "mana-common": "^0.2.2",
     "mana-syringe": "^0.2.2"
   },
