@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 import React from 'react';
 import assert from 'assert';
 import { prop, observable } from './observable';
 import { defaultObservableContext } from './context';
-import { GlobalContainer } from 'mana-syringe';
+import { GlobalContainer, inject } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
 import { useInject } from './hooks';
 import { getOrigin } from './tracker';
@@ -116,6 +117,45 @@ describe('use', () => {
     });
     act(() => {
       fooInstance.info.push(1);
+    });
+    setTimeout(() => {
+      const json: any = component.toJSON();
+      assert(json && json.children.includes('1'));
+      done();
+    }, 100);
+  });
+
+  it('#indirect inject', done => {
+    @singleton()
+    class Foo {
+      @prop() info: number = 0;
+      constructor() {
+        observable(this);
+      }
+    }
+    @singleton()
+    class Bar {
+      constructor(@inject(Foo) public foo: Foo) {
+        observable(this);
+      }
+    }
+    GlobalContainer.register(Foo);
+    GlobalContainer.register(Bar);
+    const FooRender = () => {
+      const bar = useInject(Bar);
+      return <div>{bar.foo.info}</div>;
+    };
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(
+        <>
+          <FooRender />
+        </>,
+      );
+    });
+    const fooInstance = GlobalContainer.get(Foo);
+    act(() => {
+      fooInstance.info = 1;
     });
     setTimeout(() => {
       const json: any = component.toJSON();
