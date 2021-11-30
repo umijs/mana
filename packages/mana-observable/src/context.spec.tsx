@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 
 import type { ErrorInfo } from 'react';

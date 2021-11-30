@@ -6,6 +6,61 @@ import type { Observable } from './core';
 import { getOrigin, Tracker } from './tracker';
 import type { Disposable } from 'mana-common';
 import { getPropertyDescriptor } from 'mana-common';
+import { isObservable } from './utils';
+
+function handleTracker<T extends Record<string, any>>(
+  obj: T,
+  property: string,
+  tracker: Tracker,
+  dispatch: React.Dispatch<Action<any>>,
+) {
+  if (tracker && typeof property === 'string') {
+    const reactionDispose: Disposable = Reflect.getOwnMetadata(property, dispatch);
+    if (reactionDispose) {
+      reactionDispose.dispose();
+    }
+    if (tracker) {
+      const toDispose = tracker.once(() => {
+        dispatch({
+          key: property as keyof T,
+          value: obj[property],
+        });
+      });
+      Reflect.defineMetadata(property, toDispose, dispatch);
+    }
+  }
+}
+
+function getValue<T extends Record<any, any>>(
+  obj: T,
+  property: string | symbol,
+  proxy: T,
+  tracker?: Tracker,
+) {
+  if (!tracker) {
+    const descriptor = getPropertyDescriptor(obj, property);
+    if (descriptor?.get) {
+      return descriptor.get.call(proxy);
+    }
+  }
+  return obj[property as any];
+}
+
+function handleValue<T extends Record<string, any>>(
+  value: any,
+  obj: T,
+  dispatch: React.Dispatch<Action<any>>,
+) {
+  if (typeof value === 'function') {
+    return value.bind(obj);
+  }
+  if (typeof value === 'object') {
+    if (isObservable(value)) {
+      return reactiveObject(value, dispatch);
+    }
+  }
+  return value;
+}
 
 function reactiveObject<T extends Record<string, any>>(
   object: T,
@@ -15,35 +70,14 @@ function reactiveObject<T extends Record<string, any>>(
   const proxy = new Proxy(obj, {
     get(target: any, property: string | symbol): any {
       if (property === ObservableSymbol.ObjectSelf) {
-        return obj;
+        return target;
       }
-      const tracker = Tracker.find(obj, property);
+      const tracker = Tracker.find(target, property);
       if (tracker && typeof property === 'string') {
-        const reactionDispose: Disposable = Reflect.getMetadata(property, dispatch);
-        if (reactionDispose) {
-          reactionDispose.dispose();
-        }
-        if (tracker) {
-          const toDispose = tracker.once(() => {
-            dispatch({
-              key: property as keyof T,
-              value: obj[property],
-            });
-          });
-          Reflect.defineMetadata(property, toDispose, dispatch);
-        }
+        handleTracker(target, property, tracker, dispatch);
       }
-      const descriptor = getPropertyDescriptor(obj, property);
-      let value;
-      if (descriptor?.get) {
-        value = descriptor.get.call(proxy);
-      } else {
-        value = target[property];
-      }
-      if (typeof value === 'function') {
-        return value.bind(obj);
-      }
-      return value;
+      const value = getValue(target, property, proxy, tracker);
+      return handleValue(value, target, dispatch);
     },
   });
   return proxy;
