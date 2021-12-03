@@ -7,3 +7,8 @@ export function getPropertyDescriptor(o: any, propertyName: PropertyKey) {
   }
   return descriptor;
 }
+
+export function isPlainObject(obj: any): boolean {
+  if (typeof obj !== 'object' || obj === null) return false;
+  return Object.prototype.toString.call(obj) === '[object Object]';
+}
