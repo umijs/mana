@@ -1,6 +1,7 @@
 import { ObservableSymbol } from './core';
 
 export function isObservable(obj: Record<string, any>, property?: string | symbol): boolean {
+  if (typeof obj !== 'object' || obj === null) return false;
   if (!property) {
     return Reflect.hasMetadata(ObservableSymbol.Observable, obj);
   }
