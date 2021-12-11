@@ -10,11 +10,11 @@ export type TrackedObject = {
   [ObservableSymbol.ObjectSelf]: Record<string, any>;
 };
 
-export function isTrackedObject(target: Record<string, any>): target is TrackedObject {
-  return target && typeof target === 'object' && (target as any)[ObservableSymbol.ObjectSelf];
+export function isTrackedObject(target: any): target is TrackedObject {
+  return !!target && typeof target === 'object' && (target as any)[ObservableSymbol.ObjectSelf];
 }
 
-export function getOrigin<T extends Record<string, any>>(target: T): T {
+export function getOrigin<T>(target: T): T {
   if (isTrackedObject(target)) {
     return (target as any)[ObservableSymbol.ObjectSelf];
   }

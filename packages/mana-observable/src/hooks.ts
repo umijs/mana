@@ -91,11 +91,14 @@ const reducer = <T>(state: Partial<T>, part: Action<T>) => {
   return { ...state, [part.key]: part.value };
 };
 
-export function useObserve<T extends Record<string, any>>(obj: T): T {
+export function useObserve<T>(obj: T): T {
   const [, dispatch] = React.useReducer<(prevState: Partial<T>, action: Action<T>) => Partial<T>>(
     reducer,
     {},
   );
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
   if (!Reflect.hasMetadata(dispatch, obj)) {
     const proxy = reactiveObject(obj, dispatch);
     Reflect.defineMetadata(dispatch, proxy, obj);
