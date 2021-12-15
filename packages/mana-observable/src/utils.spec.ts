@@ -3,7 +3,6 @@ import 'reflect-metadata';
 import assert from 'assert';
 import {
   isObservable,
-  isPlainObject,
   getDesignType,
   getObservableProperties,
   getOwnObservableProperties,
@@ -30,6 +29,7 @@ describe('utils', () => {
     const instanceBasic = new ClassBasic();
     assert(isObservable(ClassBasic.prototype, 'name'));
     assert(isObservable(instanceBasic, 'name'));
+    assert(!isObservable(null));
   });
   it('#observable properties', () => {
     class ClassBasic {
@@ -53,12 +53,6 @@ describe('utils', () => {
     setConstructorProperties(instanceBasic);
     properties = getOwnObservableProperties(instanceBasic);
     assert(properties?.length === 1);
-  });
-  it('#isPlainObject', () => {
-    assert(isPlainObject({}));
-    class ClassBasic {}
-    const instanceBasic = new ClassBasic();
-    assert(isPlainObject(instanceBasic));
   });
   it('#getDesignType', () => {
     class ClassBasic {

@@ -1,6 +1,6 @@
 import { ObservableSymbol } from './core';
 
-export function isObservable(obj: Record<string, any>, property?: string | symbol): boolean {
+export function isObservable(obj: any, property?: string | symbol): boolean {
   if (typeof obj !== 'object' || obj === null) return false;
   if (!property) {
     return Reflect.hasMetadata(ObservableSymbol.Observable, obj);
@@ -64,10 +64,6 @@ export function setConstructorProperties(obj: Record<string, any>): void {
  */
 export function getDesignType(obj: Record<string, any>, propertyKey: string): DesignType {
   return Reflect.getMetadata('design:type', obj, propertyKey);
-}
-
-export function isPlainObject(obj: any): boolean {
-  return Object.prototype.toString.call(obj) === '[object Object]';
 }
 
 export type DesignType =

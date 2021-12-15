@@ -5,12 +5,12 @@ import { ObservableSymbol } from './core';
 import { reactiveArray, reactiveMap, reactivePlainObject } from './reactive';
 import type { DesignType } from './utils';
 import { setConstructorProperties } from './utils';
+import { isPlainObject } from 'mana-common';
 import {
   markObservable,
   getObservableProperties,
   getDesignType,
   setObservableProperty,
-  isPlainObject,
 } from './utils';
 
 type propDecorator = (target: Record<string, any>, propertyKey: string) => void;
