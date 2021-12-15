@@ -9,6 +9,17 @@ export function getPropertyDescriptor(o: any, propertyName: PropertyKey) {
 }
 
 export function isPlainObject(obj: any): boolean {
-  if (typeof obj !== 'object' || obj === null) return false;
-  return Object.prototype.toString.call(obj) === '[object Object]';
+  if (
+    typeof obj !== 'object' ||
+    obj === null ||
+    // window/navigator/Global
+    Object.prototype.toString.call(obj) !== '[object Object]'
+  )
+    return false;
+  const proto = Object.getPrototypeOf(obj);
+  if (proto === null) {
+    return true;
+  }
+  const ctor = proto.hasOwnProperty('constructor') && proto.constructor;
+  return typeof ctor == 'function' && ctor instanceof ctor && ctor.toString() === Object.toString();
 }

@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { getPropertyDescriptor } from './objects';
+import { getPropertyDescriptor, isPlainObject } from './objects';
 
 describe('Objects', () => {
   it('#getPropertyDescriptor', () => {
@@ -27,5 +27,17 @@ describe('Objects', () => {
     assert(!desc?.get);
     desc = getPropertyDescriptor(objC, 'a');
     assert(desc?.get && desc.get() === 2);
+  });
+  it('#isPlainObject', () => {
+    class A {}
+    class B extends A {}
+    const objA = new A();
+    const objB = new B();
+    assert(isPlainObject({}));
+    assert(isPlainObject(Object.getPrototypeOf({})));
+    assert(!isPlainObject(global));
+    assert(!isPlainObject(objA));
+    assert(!isPlainObject(objB));
+    assert(!isPlainObject(null));
   });
 });
