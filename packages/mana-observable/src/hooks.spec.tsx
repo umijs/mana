@@ -8,7 +8,7 @@ import { prop, observable } from './observable';
 import { defaultObservableContext } from './context';
 import { GlobalContainer, inject } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
-import { useInject } from './hooks';
+import { useInject, useObserve } from './hooks';
 import { getOrigin } from './tracker';
 import renderer, { act } from 'react-test-renderer';
 
@@ -45,6 +45,52 @@ describe('use', () => {
     act(() => {
       const json: any = component.toJSON();
       assert(json && json.find((item: any) => item.children.includes('1')));
+      done();
+    });
+  });
+
+  it('#use observe', done => {
+    class Bar {
+      @prop() info: number = 1;
+      constructor() {
+        observable(this);
+      }
+    }
+    @singleton()
+    class FooModel {
+      @prop() bar?: Bar;
+      constructor() {
+        observable(this);
+      }
+      set() {
+        this.bar = new Bar();
+      }
+    }
+    GlobalContainer.register(FooModel);
+    const FooRender = () => {
+      const foo = useInject(FooModel);
+      const bar = useObserve(foo.bar);
+      return <div>{bar && bar.info}</div>;
+    };
+    let component: renderer.ReactTestRenderer;
+    const fooModel = GlobalContainer.get(FooModel);
+    act(() => {
+      component = renderer.create(
+        <>
+          <FooRender />
+        </>,
+      );
+
+      const json = component.toJSON();
+      assert(json === null);
+    });
+    act(() => {
+      fooModel.set();
+    });
+    act(() => {
+      const json = component.toJSON();
+
+      assert(!(json instanceof Array) && json && json.children?.find(item => item === '1'));
       done();
     });
   });

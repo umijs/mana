@@ -51,9 +51,6 @@ function handleValue<T extends Record<string, any>>(
   obj: T,
   dispatch: React.Dispatch<Action<any>>,
 ) {
-  if (typeof value === 'function') {
-    return value.bind(obj);
-  }
   if (typeof value === 'object') {
     if (isObservable(value)) {
       return reactiveObject(value, dispatch);
