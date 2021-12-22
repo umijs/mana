@@ -20,9 +20,3 @@ export const defaultObservableContext = new ObservableContextImpl();
 
 export const ObservableContext =
   React.createContext<Observable.ContainerContext>(defaultObservableContext);
-
-export const Provider: React.FC<Observable.ContainerContext> = props => (
-  <ObservableContext.Provider value={{ getContainer: props.getContainer }}>
-    {props.children}
-  </ObservableContext.Provider>
-);

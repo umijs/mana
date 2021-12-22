@@ -1,3 +1,5 @@
+import type { Abstract, Newable } from 'mana-common';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export namespace ObservableSymbol {
   export const Tracker = Symbol('Tracker');
@@ -6,11 +8,6 @@ export namespace ObservableSymbol {
   export const ObjectSelf = Symbol('ObjectSelf');
 }
 
-export type Newable<T> = new (...args: any[]) => T;
-
-export type Abstract<T> = {
-  prototype: T;
-};
 export type Reaction = (target?: any, prop?: any) => void;
 
 export namespace Observable {

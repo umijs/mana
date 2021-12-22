@@ -7,7 +7,7 @@ import type { ErrorInfo } from 'react';
 import React from 'react';
 import assert from 'assert';
 import { prop, observable } from './observable';
-import { Provider } from './context';
+import { ObservableContext } from './context';
 import { GlobalContainer } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
 import { useInject } from './hooks';
@@ -79,9 +79,9 @@ describe('context', () => {
       return <div>{foo.info}</div>;
     };
     const component = renderer.create(
-      <Provider getContainer={() => container}>
+      <ObservableContext.Provider value={{ getContainer: () => container }}>
         <ContextRender />
-      </Provider>,
+      </ObservableContext.Provider>,
     );
     const json: any = component.toJSON();
     assert(json && json.children.includes('1'));
