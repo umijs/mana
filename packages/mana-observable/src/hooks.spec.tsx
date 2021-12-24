@@ -4,13 +4,14 @@ import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 import React from 'react';
 import assert from 'assert';
-import { prop, observable } from './observable';
+import { observable } from './observable';
 import { defaultObservableContext } from './context';
 import { GlobalContainer, inject } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
 import { useInject, useObserve } from './hooks';
 import { getOrigin } from './tracker';
 import renderer, { act } from 'react-test-renderer';
+import { prop } from './decorator';
 
 describe('use', () => {
   defaultObservableContext.config({

@@ -6,7 +6,6 @@ import type { Observable } from './core';
 import { getOrigin, Tracker } from './tracker';
 import type { Disposable } from 'mana-common';
 import { getPropertyDescriptor } from 'mana-common';
-import { isObservable } from './utils';
 
 function handleTracker<T extends Record<string, any>>(
   obj: T,
@@ -51,10 +50,8 @@ function handleValue<T extends Record<string, any>>(
   obj: T,
   dispatch: React.Dispatch<Action<any>>,
 ) {
-  if (typeof value === 'object') {
-    if (isObservable(value)) {
-      return reactiveObject(value, dispatch);
-    }
+  if (typeof value === 'object' && value !== null) {
+    return reactiveObject(value, dispatch);
   }
   return value;
 }

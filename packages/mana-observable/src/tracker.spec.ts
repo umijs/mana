@@ -1,7 +1,8 @@
 import 'regenerator-runtime/runtime';
 import assert from 'assert';
-import { prop, observable } from './observable';
+import { observable } from './observable';
 import { Tracker } from './tracker';
+import { prop } from './decorator';
 
 describe('tarcker', () => {
   it('#create tracker', () => {
@@ -57,7 +58,7 @@ describe('tarcker', () => {
     }
     const foo = new Foo();
     const tracker = Tracker.find(foo, 'name');
-    tracker?.changed(() => {
+    tracker?.onChange(() => {
       done();
     });
     assert(!!Tracker.find(foo, 'name'));
@@ -77,7 +78,7 @@ describe('tarcker', () => {
     tracker?.once(() => {
       once += 1;
     });
-    tracker?.changed(() => {
+    tracker?.onChange(() => {
       times += 1;
       if (times == 2) {
         assert(once == 1);

@@ -3,9 +3,11 @@ import 'react';
 import { GlobalContainer } from 'mana-syringe';
 import assert from 'assert';
 import { defaultObservableContext } from './context';
-import { prop, observable } from './observable';
+import { observable } from './observable';
 import { Tracker } from './tracker';
-import { isObservable, getObservableProperties } from './utils';
+import { isObservableProperty, getObservableProperties } from './utils';
+import { prop } from './decorator';
+import { Reactable } from './reactivity';
 
 describe('observable', () => {
   defaultObservableContext.config({
@@ -19,9 +21,8 @@ describe('observable', () => {
       }
     }
     const instanceBasic = new ClassBasic();
-    assert(isObservable(instanceBasic, 'name'));
-    assert(isObservable(instanceBasic));
     assert(getObservableProperties(instanceBasic)?.includes('name'));
+    assert(isObservableProperty(instanceBasic, 'name'));
   });
   it('#extends properties', () => {
     class ClassBasic {
@@ -87,6 +88,12 @@ describe('observable', () => {
     }
     const instanceArray = new ClassArray();
     let changed = false;
+    if (Reactable.is(instanceArray.list)) {
+      const reactor = Reactable.get(instanceArray.list);
+      reactor.onChange(() => {
+        changed = true;
+      });
+    }
     const tracker = Tracker.find(instanceArray, 'list');
     tracker?.add(() => {
       changed = true;

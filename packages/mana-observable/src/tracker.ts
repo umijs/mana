@@ -4,7 +4,7 @@ import type { Reaction } from './core';
 import { ObservableSymbol } from './core';
 import { Emitter } from 'mana-common';
 import type { Disposable } from 'mana-common';
-import { isObservable } from './utils';
+import { isObservableProperty } from './utils';
 
 export type TrackedObject = {
   [ObservableSymbol.ObjectSelf]: Record<string, any>;
@@ -44,7 +44,7 @@ export interface TrackInfo<T = any> {
 export class Tracker implements Disposable {
   protected changedEmitter = new Emitter<TrackInfo>();
   disposed: boolean = false;
-  get changed() {
+  get onChange() {
     return this.changedEmitter.event;
   }
 
@@ -54,11 +54,11 @@ export class Tracker implements Disposable {
   }
 
   add(trigger: Reaction): Disposable {
-    return this.changed(trigger);
+    return this.onChange(trigger);
   }
 
   once(trigger: Reaction): Disposable {
-    const toDispose = this.changed(e => {
+    const toDispose = this.onChange(e => {
       trigger(e.target, e.prop);
       toDispose.dispose();
     });
@@ -88,7 +88,7 @@ export class Tracker implements Disposable {
     return exist;
   }
   static find(target: any, prop?: any): Tracker | undefined {
-    if (!isObservable(target, prop)) {
+    if (prop && !isObservableProperty(target, prop)) {
       return undefined;
     }
     return Tracker.getOrCreate(target, prop);

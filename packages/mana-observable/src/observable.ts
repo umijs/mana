@@ -1,81 +1,70 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import 'reflect-metadata';
-import { Tracker } from './tracker';
-import { ObservableSymbol } from './core';
-import { reactiveArray, reactiveMap, reactivePlainObject } from './reactive';
-import type { DesignType } from './utils';
-import { setConstructorProperties } from './utils';
-import { isPlainObject } from 'mana-common';
+import type { Disposable } from 'mana-common';
+import type { Reactor } from './reactivity';
+import { Reactable } from './reactivity';
 import {
-  markObservable,
+  defineInstanceValue,
+  getInstanceValue,
+  setConstructorProperties,
   getObservableProperties,
-  getDesignType,
-  setObservableProperty,
+  markObservable,
 } from './utils';
-
-type propDecorator = (target: Record<string, any>, propertyKey: string) => void;
-
-export const dataTrans = (
-  target: any,
-  propertyKey: string,
-  propertyType: DesignType,
-  value: any,
-) => {
-  if (value === undefined) return value;
-  if (!value) return value;
-  if (propertyType === Array && !value[ObservableSymbol.ObjectSelf]) {
-    return reactiveArray(value, target, propertyKey);
-  }
-  if (propertyType === Map && !value[ObservableSymbol.ObjectSelf]) {
-    return reactiveMap(value, target, propertyKey);
-  }
-  if (propertyType === Object && !value[ObservableSymbol.ObjectSelf] && isPlainObject(value)) {
-    return reactivePlainObject(value, target, propertyKey);
-  }
-  return value;
-};
+import { Tracker } from './tracker';
 
 export function observable(target: any): void {
+  // get observable properties from constructor
   setConstructorProperties(target);
-  const trackableProperties = getObservableProperties(target);
-  if (trackableProperties && trackableProperties.length > 0) {
-    trackableProperties.forEach(propertyKey => {
-      const propertyType = getDesignType(target, propertyKey);
-      const initialValue = dataTrans(target, propertyKey, propertyType, target[propertyKey]);
-      Reflect.defineMetadata(propertyKey, initialValue, target);
+  const observableProperties = getObservableProperties(target);
+  if (observableProperties && observableProperties.length > 0) {
+    // redefine observable properties
+    observableProperties.forEach(property => {
+      let reactorListenDispose: Disposable;
+      /**
+       * notify reactor when property changed
+       */
+      const onChange = () => {
+        Tracker.trigger(target, property);
+      };
+      /**
+       * set observable property value and register onChange listener
+       * @param value
+       * @param reactor
+       */
+      const setValue = (value: any, reactor: Reactor | undefined) => {
+        defineInstanceValue(target, property, value);
+        if (reactor) {
+          if (reactorListenDispose) {
+            reactorListenDispose.dispose();
+          }
+          reactorListenDispose = reactor.onChange(onChange);
+        }
+      };
+      setValue(...Reactable.transform(target[property]));
       // property getter
       const getter = function getter(this: any): void {
-        const value = Reflect.getMetadata(propertyKey, target);
+        const value = Reflect.getMetadata(property, target);
         return value;
       };
       // property setter
-      const setter = function setter(this: any, val: any): void {
-        const value = dataTrans(target, propertyKey, propertyType, val);
-        const oldValue = Reflect.getMetadata(propertyKey, target);
-        Reflect.defineMetadata(propertyKey, value, target);
+      const setter = function setter(this: any, value: any): void {
+        const [tValue, reactor] = Reactable.transform(value);
+        const oldValue = getInstanceValue(target, property);
+        setValue(tValue, reactor);
         if (value !== oldValue) {
-          Tracker.trigger(target, propertyKey);
+          onChange();
         }
       };
-      // redefine property
-      if (Reflect.deleteProperty(target, propertyKey)) {
-        Reflect.defineProperty(target, propertyKey, {
+      // define property
+      if (Reflect.deleteProperty(target, property)) {
+        Reflect.defineProperty(target, property, {
           configurable: true,
           enumerable: true,
           get: getter,
           set: setter,
         });
       }
+      // mark observable property
+      markObservable(target, property);
     });
-    markObservable(target);
   }
-}
-/**
- * Define observable property
- */
-export function prop(): propDecorator {
-  return (target: Record<string, any>, propertyKey: string) => {
-    markObservable(target, propertyKey);
-    setObservableProperty(target, propertyKey);
-  };
 }

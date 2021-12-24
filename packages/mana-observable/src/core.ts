@@ -2,6 +2,7 @@ import type { Abstract, Newable } from 'mana-common';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export namespace ObservableSymbol {
+  export const Reactor = Symbol('Reactor');
   export const Tracker = Symbol('Tracker');
   export const Observable = Symbol('Observable');
   export const ObservableProperties = Symbol('ObservableProperties');

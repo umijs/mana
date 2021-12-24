@@ -6,12 +6,13 @@ import 'regenerator-runtime/runtime';
 import type { ErrorInfo } from 'react';
 import React from 'react';
 import assert from 'assert';
-import { prop, observable } from './observable';
+import { observable } from './observable';
 import { ObservableContext } from './context';
 import { GlobalContainer } from 'mana-syringe';
 import { singleton } from 'mana-syringe';
 import { useInject } from './hooks';
 import renderer from 'react-test-renderer';
+import { prop } from './decorator';
 
 console.error = () => {};
 class ErrorBoundary extends React.Component {

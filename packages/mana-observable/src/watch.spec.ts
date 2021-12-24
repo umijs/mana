@@ -2,9 +2,10 @@ import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 
 import assert from 'assert';
-import { prop, observable } from './observable';
+import { observable } from './observable';
 import { watch } from './watch';
 import { Disposable } from 'mana-common';
+import { prop } from './decorator';
 
 describe('watch', () => {
   it('#watch prop', done => {
@@ -21,12 +22,13 @@ describe('watch', () => {
     watchLatest = foo.name;
     watch(foo, 'name', () => {
       watchLatest = foo.name;
+      console.log(foo, watchLatest, foo.name);
       assert(watchLatest === newName);
       done();
     });
     foo.name = newName;
   });
-  it('#watch object', done => {
+  it('#watch object', () => {
     class Foo {
       @prop() name?: string;
       @prop() info?: string;
@@ -44,12 +46,10 @@ describe('watch', () => {
       changed += 1;
       watchLatest = foo.name;
       assert(watchLatest === newName);
-      if (changed === 2) {
-        done();
-      }
     });
     foo.name = newName;
-    foo.info = '';
+    foo.info = 'foo';
+    assert(changed === 2);
   });
   it('#watch unobservable prop', done => {
     class Foo {
@@ -76,7 +76,6 @@ describe('watch', () => {
   });
 
   it('#invalid watch', () => {
-    class A {}
     class Foo {
       @prop() name?: string;
       constructor() {
@@ -84,10 +83,7 @@ describe('watch', () => {
       }
     }
     const foo = new Foo();
-    const a = new A();
     const toDispose = (watch as any)(foo, 'name');
-    const toDisposeA = watch(a, () => {});
     assert(toDispose === Disposable.NONE);
-    assert(toDisposeA === Disposable.NONE);
   });
 });
