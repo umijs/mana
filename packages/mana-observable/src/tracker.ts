@@ -4,7 +4,7 @@ import type { Reaction } from './core';
 import { ObservableSymbol } from './core';
 import { Emitter } from 'mana-common';
 import type { Disposable } from 'mana-common';
-import { isObservableProperty } from './utils';
+import { Observable } from './utils';
 
 export type TrackedObject = {
   [ObservableSymbol.ObjectSelf]: Record<string, any>;
@@ -88,7 +88,10 @@ export class Tracker implements Disposable {
     return exist;
   }
   static find(target: any, prop?: any): Tracker | undefined {
-    if (prop && !isObservableProperty(target, prop)) {
+    if (!Observable.tarckable(target)) {
+      return undefined;
+    }
+    if (prop && !Observable.is(target, prop)) {
       return undefined;
     }
     return Tracker.getOrCreate(target, prop);

@@ -2,19 +2,13 @@
 import type { Disposable } from 'mana-common';
 import type { Reactor } from './reactivity';
 import { Reactable } from './reactivity';
-import {
-  defineInstanceValue,
-  getInstanceValue,
-  setConstructorProperties,
-  getObservableProperties,
-  markObservable,
-} from './utils';
+import { InstanceValue, ObservableProperties, Observable } from './utils';
 import { Tracker } from './tracker';
 
 export function observable(target: any): void {
   // get observable properties from constructor
-  setConstructorProperties(target);
-  const observableProperties = getObservableProperties(target);
+  ObservableProperties.setInstance(target);
+  const observableProperties = ObservableProperties.get(target);
   if (observableProperties && observableProperties.length > 0) {
     // redefine observable properties
     observableProperties.forEach(property => {
@@ -31,7 +25,7 @@ export function observable(target: any): void {
        * @param reactor
        */
       const setValue = (value: any, reactor: Reactor | undefined) => {
-        defineInstanceValue(target, property, value);
+        InstanceValue.set(target, property, value);
         if (reactor) {
           if (reactorListenDispose) {
             reactorListenDispose.dispose();
@@ -48,7 +42,7 @@ export function observable(target: any): void {
       // property setter
       const setter = function setter(this: any, value: any): void {
         const [tValue, reactor] = Reactable.transform(value);
-        const oldValue = getInstanceValue(target, property);
+        const oldValue = InstanceValue.get(target, property);
         setValue(tValue, reactor);
         if (value !== oldValue) {
           onChange();
@@ -64,7 +58,7 @@ export function observable(target: any): void {
         });
       }
       // mark observable property
-      markObservable(target, property);
+      Observable.mark(target, property);
     });
   }
 }

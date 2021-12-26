@@ -84,6 +84,8 @@ describe('watch', () => {
     }
     const foo = new Foo();
     const toDispose = (watch as any)(foo, 'name');
+    const toDispose1 = watch(null, () => {});
     assert(toDispose === Disposable.NONE);
+    assert(toDispose1 === Disposable.NONE);
   });
 });

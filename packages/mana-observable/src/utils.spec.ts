@@ -1,37 +1,43 @@
 import 'regenerator-runtime/runtime';
 import 'reflect-metadata';
 import assert from 'assert';
-import {
-  getDesignType,
-  getObservableProperties,
-  getOwnObservableProperties,
-  markObservableProperty,
-  setConstructorProperties,
-} from './utils';
+import { getDesignType, ObservableProperties, Observable } from './utils';
 import { prop } from './decorator';
 
 describe('utils', () => {
-  it('#observable properties', () => {
+  it('#Observable', () => {
+    class Foo {
+      info = '';
+    }
+    const foo = new Foo();
+    ObservableProperties.add(Foo, 'name');
+    assert(!Observable.tarckable(null));
+    assert(!Observable.is(null, 'name'));
+    assert(Observable.tarckable({}));
+    Observable.mark(foo, 'info');
+    assert(Observable.is(foo, 'info'));
+  });
+  it('#ObservableProperties', () => {
     class ClassBasic {
       name = '';
       name1 = '';
     }
     class ClassBasic1 extends ClassBasic {}
     const instanceBasic = new ClassBasic();
-    let properties = getObservableProperties(instanceBasic);
+    let properties = ObservableProperties.get(instanceBasic);
     assert(!properties);
-    markObservableProperty(ClassBasic, 'name');
-    properties = getObservableProperties(ClassBasic);
+    ObservableProperties.add(ClassBasic, 'name');
+    properties = ObservableProperties.get(ClassBasic);
     assert(properties?.length === 1);
     assert(properties.includes('name'));
-    markObservableProperty(ClassBasic1, 'name1');
-    properties = getObservableProperties(ClassBasic1);
+    ObservableProperties.add(ClassBasic1, 'name1');
+    properties = ObservableProperties.get(ClassBasic1);
     assert(properties?.length === 2);
     assert(properties.includes('name1'));
-    properties = getObservableProperties(instanceBasic);
+    properties = ObservableProperties.get(instanceBasic);
     assert(!properties);
-    setConstructorProperties(instanceBasic);
-    properties = getOwnObservableProperties(instanceBasic);
+    ObservableProperties.setInstance(instanceBasic);
+    properties = ObservableProperties.getOwn(instanceBasic);
     assert(properties?.length === 1);
   });
   it('#getDesignType', () => {

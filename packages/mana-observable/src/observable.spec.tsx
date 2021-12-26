@@ -5,7 +5,7 @@ import assert from 'assert';
 import { defaultObservableContext } from './context';
 import { observable } from './observable';
 import { Tracker } from './tracker';
-import { isObservableProperty, getObservableProperties } from './utils';
+import { Observable, ObservableProperties } from './utils';
 import { prop } from './decorator';
 import { Reactable } from './reactivity';
 
@@ -21,8 +21,8 @@ describe('observable', () => {
       }
     }
     const instanceBasic = new ClassBasic();
-    assert(getObservableProperties(instanceBasic)?.includes('name'));
-    assert(isObservableProperty(instanceBasic, 'name'));
+    assert(ObservableProperties.get(instanceBasic)?.includes('name'));
+    assert(Observable.is(instanceBasic, 'name'));
   });
   it('#extends properties', () => {
     class ClassBasic {
@@ -51,15 +51,15 @@ describe('observable', () => {
     const instanceBasic = new ClassBasic();
     const instanceBasic1 = new ClassBasic1();
     const instanceBasic2 = new ClassBasic2();
-    assert(getObservableProperties(instanceBasic)?.includes('name'));
-    assert(getObservableProperties(instanceBasic)?.length === 1);
-    assert(getObservableProperties(instanceBasic1)?.includes('name'));
-    assert(getObservableProperties(instanceBasic1)?.includes('name1'));
-    assert(getObservableProperties(instanceBasic1)?.length === 2);
-    assert(getObservableProperties(instanceBasic2)?.includes('name'));
-    assert(getObservableProperties(instanceBasic2)?.includes('name1'));
-    assert(getObservableProperties(instanceBasic2)?.includes('name2'));
-    assert(getObservableProperties(instanceBasic2)?.length === 3);
+    assert(ObservableProperties.get(instanceBasic)?.includes('name'));
+    assert(ObservableProperties.get(instanceBasic)?.length === 1);
+    assert(ObservableProperties.get(instanceBasic1)?.includes('name'));
+    assert(ObservableProperties.get(instanceBasic1)?.includes('name1'));
+    assert(ObservableProperties.get(instanceBasic1)?.length === 2);
+    assert(ObservableProperties.get(instanceBasic2)?.includes('name'));
+    assert(ObservableProperties.get(instanceBasic2)?.includes('name1'));
+    assert(ObservableProperties.get(instanceBasic2)?.includes('name2'));
+    assert(ObservableProperties.get(instanceBasic2)?.length === 3);
   });
   it('#basic usage', () => {
     class ClassBasic {

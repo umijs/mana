@@ -1,55 +1,58 @@
 import 'reflect-metadata';
-import type { Newable } from 'mana-common';
 import { ObservableSymbol } from './core';
 
-export function isObservableProperty(obj: any, property: string | symbol): boolean {
-  if (typeof obj !== 'object' || obj === null) return false;
-  return Reflect.hasMetadata(ObservableSymbol.Observable, obj, property);
-}
-
-export function markObservable(obj: Record<string, any>, property: string | symbol) {
-  Reflect.defineMetadata(ObservableSymbol.Observable, true, obj, property);
-}
-
-export function markClassObservable(newable: Newable<any>, property: string | symbol) {
-  Reflect.defineMetadata(ObservableSymbol.Observable, true, newable, property);
-}
-
-export function getOwnObservableProperties(obj: Record<string, any>): string[] | undefined {
-  return Reflect.getOwnMetadata(ObservableSymbol.ObservableProperties, obj);
-}
-export function getObservableProperties(obj: Record<string, any>): string[] | undefined {
-  return Reflect.getMetadata(ObservableSymbol.ObservableProperties, obj);
-}
-
-export function markObservableProperty(newable: Record<any, any>, propertyKey: string): void {
-  const exisringProperties = getOwnObservableProperties(newable);
-  if (exisringProperties) {
-    exisringProperties.push(propertyKey);
-  } else {
-    const protoProperties = getObservableProperties(newable) || [];
-    Reflect.defineMetadata(
-      ObservableSymbol.ObservableProperties,
-      [...protoProperties, propertyKey],
-      newable,
-    );
+export namespace Observable {
+  export function tarckable(obj: any): boolean {
+    if (typeof obj !== 'object' || obj === null) return false;
+    return true;
+  }
+  export function is(obj: any, property: string | symbol): boolean {
+    if (!tarckable(obj)) return false;
+    return Reflect.hasMetadata(ObservableSymbol.Observable, obj, property);
+  }
+  export function mark(obj: Record<any, any>, property: string | symbol) {
+    Reflect.defineMetadata(ObservableSymbol.Observable, true, obj, property);
   }
 }
 
-export function setConstructorProperties(obj: Record<string, any>): void {
-  if (obj.constructor) {
-    const exisringProperties = getOwnObservableProperties(obj.constructor);
+export namespace ObservableProperties {
+  export function getOwn(obj: Record<string, any>): string[] | undefined {
+    return Reflect.getOwnMetadata(ObservableSymbol.ObservableProperties, obj);
+  }
+  export function get(obj: Record<string, any>): string[] | undefined {
+    return Reflect.getMetadata(ObservableSymbol.ObservableProperties, obj);
+  }
+
+  export function add(newable: Record<any, any>, propertyKey: string): void {
+    const exisringProperties = getOwn(newable);
     if (exisringProperties) {
-      Reflect.defineMetadata(ObservableSymbol.ObservableProperties, [...exisringProperties], obj);
+      exisringProperties.push(propertyKey);
+    } else {
+      const protoProperties = get(newable) || [];
+      Reflect.defineMetadata(
+        ObservableSymbol.ObservableProperties,
+        [...protoProperties, propertyKey],
+        newable,
+      );
+    }
+  }
+  export function setInstance(obj: Record<string, any>): void {
+    if (obj.constructor) {
+      const exisringProperties = get(obj.constructor);
+      if (exisringProperties) {
+        Reflect.defineMetadata(ObservableSymbol.ObservableProperties, [...exisringProperties], obj);
+      }
     }
   }
 }
 
-export function defineInstanceValue(target: any, propertyKey: string, value: any) {
-  Reflect.defineMetadata(propertyKey, value, target);
-}
-export function getInstanceValue(target: any, propertyKey: string) {
-  Reflect.getMetadata(propertyKey, target);
+export namespace InstanceValue {
+  export function set(target: any, propertyKey: string, value: any) {
+    Reflect.defineMetadata(propertyKey, value, target);
+  }
+  export function get(target: any, propertyKey: string) {
+    Reflect.getMetadata(propertyKey, target);
+  }
 }
 
 /**
