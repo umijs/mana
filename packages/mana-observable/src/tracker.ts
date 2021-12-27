@@ -1,99 +1,115 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import 'reflect-metadata';
-import type { Reaction } from './core';
-import { ObservableSymbol } from './core';
-import { Emitter } from 'mana-common';
 import type { Disposable } from 'mana-common';
-import { Observable } from './utils';
+import { getPropertyDescriptor } from 'mana-common';
+import { observable } from '.';
+import { ObservableSymbol } from './core';
+import { Notifier } from './notifier';
+import { Observability } from './utils';
 
-export type TrackedObject = {
-  [ObservableSymbol.ObjectSelf]: Record<string, any>;
+type Act = (...args: any) => void;
+
+function getValue<T extends Record<any, any>>(
+  obj: T,
+  property: string | symbol,
+  proxy: T,
+  notifier?: Notifier,
+) {
+  if (!notifier) {
+    const descriptor = getPropertyDescriptor(obj, property);
+    if (descriptor?.get) {
+      return descriptor.get.call(proxy);
+    }
+  }
+  return obj[property as any];
+}
+
+export type Trackable = {
+  [ObservableSymbol.Tracker]: Record<string, any>;
 };
 
-export function isTrackedObject(target: any): target is TrackedObject {
-  return !!target && typeof target === 'object' && (target as any)[ObservableSymbol.ObjectSelf];
-}
-
-export function getOrigin<T>(target: T): T {
-  if (isTrackedObject(target)) {
-    return (target as any)[ObservableSymbol.ObjectSelf];
+export namespace Trackable {
+  export function is(target: any): target is Trackable {
+    return Observability.trackable(target) && (target as any)[ObservableSymbol.Tracker];
   }
-  return target;
-}
-
-function setTracker(tracker: Tracker, obj: Record<string, any>, property?: string | symbol) {
-  if (property === undefined) {
-    Reflect.defineMetadata(ObservableSymbol.Tracker, tracker, obj);
-  } else {
-    Reflect.defineMetadata(ObservableSymbol.Tracker, tracker, obj, property);
+  export function getOrigin(target: Trackable): any {
+    return target[ObservableSymbol.Tracker];
+  }
+  export function tryGetOrigin(target: any): any {
+    if (!is(target)) {
+      return target;
+    }
+    return getOrigin(target);
   }
 }
-
-function getTracker(obj: Record<string, any>, property?: string | symbol): Tracker | undefined {
-  if (property === undefined) {
-    return Reflect.getMetadata(ObservableSymbol.Tracker, obj);
-  } else {
-    return Reflect.getMetadata(ObservableSymbol.Tracker, obj, property);
+export namespace Tracker {
+  export function set<T = any>(target: T, act: Act, proxy: T) {
+    Reflect.defineMetadata(act, proxy, target);
   }
-}
-
-export interface TrackInfo<T = any> {
-  target: T;
-  prop?: any;
-}
-export class Tracker implements Disposable {
-  protected changedEmitter = new Emitter<TrackInfo>();
-  disposed: boolean = false;
-  get onChange() {
-    return this.changedEmitter.event;
+  export function get<T = any>(target: T, act: Act) {
+    return Reflect.getMetadata(act, target);
+  }
+  export function has<T = any>(target: T, act: Act) {
+    return Reflect.hasOwnMetadata(act, target);
   }
 
-  dispose() {
-    this.changedEmitter.dispose();
-    this.disposed = true;
+  function handleNotifier<T extends Record<string, any>>(
+    obj: T,
+    property: string,
+    notifier: Notifier,
+    act: Act,
+  ) {
+    if (notifier && typeof property === 'string') {
+      const reactionDispose: Disposable = Reflect.getOwnMetadata(act, obj, property);
+      if (reactionDispose) {
+        reactionDispose.dispose();
+      }
+      if (notifier) {
+        const toDispose = notifier.once(() => {
+          act({
+            key: property as keyof T,
+            value: obj[property],
+          });
+        });
+        Reflect.defineMetadata(act, toDispose, obj, property);
+      }
+    }
   }
 
-  add(trigger: Reaction): Disposable {
-    return this.onChange(trigger);
-  }
-
-  once(trigger: Reaction): Disposable {
-    const toDispose = this.onChange(e => {
-      trigger(e.target, e.prop);
-      toDispose.dispose();
+  export function track<T extends Record<any, any>>(object: T, act: Act): T {
+    if (!Observability.trackable(object)) {
+      return object;
+    }
+    let origin = object;
+    if (Trackable.is(object)) {
+      origin = Trackable.getOrigin(object);
+    }
+    if (has(origin, act)) {
+      return get(origin, act);
+    }
+    if (!Observability.is(origin)) {
+      observable(origin);
+    }
+    const proxy = new Proxy(origin, {
+      get(target: any, property: string | symbol): any {
+        if (property === ObservableSymbol.Tracker) {
+          return target;
+        }
+        let notifier;
+        if (typeof property === 'string') {
+          if (Observability.notifiable(target, property)) {
+            notifier = Notifier.getOrCreate(target, property);
+            handleNotifier(target, property, notifier, act);
+          }
+        }
+        const value = getValue(target, property, proxy, notifier);
+        if (Observability.trackable(value)) {
+          return track(value, act);
+        }
+        return value;
+      },
     });
-    return toDispose;
-  }
-
-  notify(target: any, prop?: any): void {
-    this.changedEmitter.fire({ target, prop });
-    if (prop) {
-      Tracker.trigger(target);
-    }
-  }
-
-  static trigger(target: any, prop?: any): void {
-    const exist = getTracker(target, prop);
-    if (exist) {
-      exist.notify(target, prop);
-    }
-  }
-  static getOrCreate(target: any, prop?: any): Tracker {
-    const exist = getTracker(target, prop);
-    if (!exist || exist.disposed) {
-      const tracker = new Tracker();
-      setTracker(tracker, target, prop);
-      return tracker;
-    }
-    return exist;
-  }
-  static find(target: any, prop?: any): Tracker | undefined {
-    if (!Observable.tarckable(target)) {
-      return undefined;
-    }
-    if (prop && !Observable.is(target, prop)) {
-      return undefined;
-    }
-    return Tracker.getOrCreate(target, prop);
+    set(object, act, proxy);
+    return proxy;
   }
 }
+
+export const getOrigin = Trackable.tryGetOrigin;

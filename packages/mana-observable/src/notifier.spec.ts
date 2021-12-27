@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import assert from 'assert';
 import { observable } from './observable';
-import { Tracker } from './tracker';
+import { Notifier } from './notifier';
 import { prop } from './decorator';
 
 describe('tarcker', () => {
@@ -17,9 +17,9 @@ describe('tarcker', () => {
     }
     const foo = new Foo();
     const bar = new Bar();
-    Tracker.find(foo, 'name');
-    assert(!!Tracker.find(foo, 'name'));
-    assert(!Tracker.find(bar, 'name'));
+    Notifier.find(foo, 'name');
+    assert(!!Notifier.find(foo, 'name'));
+    assert(!Notifier.find(bar, 'name'));
   });
   it('#dispose tracker', () => {
     class Foo {
@@ -29,9 +29,9 @@ describe('tarcker', () => {
       }
     }
     const foo = new Foo();
-    const tracker = Tracker.find(foo, 'name');
+    const tracker = Notifier.find(foo, 'name');
     tracker?.dispose();
-    const newTracker = Tracker.find(foo, 'name');
+    const newTracker = Notifier.find(foo, 'name');
     assert(tracker?.disposed && newTracker !== tracker);
   });
   it('#tracker notify', done => {
@@ -42,11 +42,11 @@ describe('tarcker', () => {
       }
     }
     const foo = new Foo();
-    const tracker = Tracker.find(foo, 'name');
+    const tracker = Notifier.find(foo, 'name');
     tracker?.add(() => {
       done();
     });
-    assert(!!Tracker.find(foo, 'name'));
+    assert(!!Notifier.find(foo, 'name'));
     tracker?.notify(foo, 'name');
   });
   it('#tracker changed', done => {
@@ -57,11 +57,11 @@ describe('tarcker', () => {
       }
     }
     const foo = new Foo();
-    const tracker = Tracker.find(foo, 'name');
+    const tracker = Notifier.find(foo, 'name');
     tracker?.onChange(() => {
       done();
     });
-    assert(!!Tracker.find(foo, 'name'));
+    assert(!!Notifier.find(foo, 'name'));
     tracker?.notify(foo, 'name');
   });
   it('#tracker once', done => {
@@ -72,7 +72,7 @@ describe('tarcker', () => {
       }
     }
     const foo = new Foo();
-    const tracker = Tracker.find(foo, 'name');
+    const tracker = Notifier.find(foo, 'name');
     let times = 0;
     let once = 0;
     tracker?.once(() => {
@@ -85,7 +85,7 @@ describe('tarcker', () => {
         done();
       }
     });
-    assert(!!Tracker.find(foo, 'name'));
+    assert(!!Notifier.find(foo, 'name'));
     tracker?.notify(foo, 'name');
     tracker?.notify(foo, 'name');
   });

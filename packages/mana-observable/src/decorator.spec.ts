@@ -9,15 +9,19 @@ describe('decorator', () => {
       name?: string;
     }
 
-    class ExtFoo extends Foo {
+    class FooExt extends Foo {
       @prop()
       info?: string;
     }
-    const p = ObservableProperties.getOwn(Foo.prototype);
-    assert(p?.length === 1 && p.includes('name'));
-    const extp = ObservableProperties.getOwn(ExtFoo.prototype);
-    assert(extp?.length === 2 && extp.includes('info'));
-    const ps = ObservableProperties.get(ExtFoo.prototype);
-    assert(ps?.length === 2);
+    class FooExtExt extends FooExt {}
+    const foo = new Foo();
+    const properties = ObservableProperties.getOwn(Foo);
+    assert(properties?.length === 1 && properties.includes('name'));
+    const extProperties = ObservableProperties.getOwn(FooExt);
+    assert(extProperties?.length === 2 && extProperties.includes('info'));
+    const extextProperties = ObservableProperties.get(FooExtExt);
+    assert(extextProperties?.length === 2);
+    const instanceProperties = ObservableProperties.find(foo);
+    assert(instanceProperties?.length === 1 && instanceProperties.includes('name'));
   });
 });

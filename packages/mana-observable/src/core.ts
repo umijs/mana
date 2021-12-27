@@ -4,12 +4,13 @@ import type { Abstract, Newable } from 'mana-common';
 export namespace ObservableSymbol {
   export const Reactor = Symbol('Reactor');
   export const Tracker = Symbol('Tracker');
+  export const Notifier = Symbol('Notifier');
   export const Observable = Symbol('Observable');
   export const ObservableProperties = Symbol('ObservableProperties');
   export const ObjectSelf = Symbol('ObjectSelf');
 }
 
-export type Reaction = (target?: any, prop?: any) => void;
+export type Notify = (target?: any, prop?: any) => void;
 
 export namespace Observable {
   export type Container = {

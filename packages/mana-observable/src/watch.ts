@@ -1,25 +1,26 @@
 import { Disposable } from 'mana-common';
-import type { Reaction } from './core';
-import { Tracker, getOrigin } from './tracker';
+import type { Notify } from './core';
+import { Notifier } from './notifier';
+import { getOrigin } from './tracker';
 
 console.warn = () => {};
 
-function watchAll<T>(target: T, callback: Reaction): Disposable {
+function watchAll<T>(target: T, callback: Notify): Disposable {
   const data = getOrigin(target);
-  const tracker = Tracker.find(data);
+  const tracker = Notifier.find(data);
   if (!tracker) {
     return Disposable.NONE;
   }
   const props: string[] = Object.keys(data);
   if (props) {
-    props.forEach(prop => Tracker.find(target, prop));
+    props.forEach(prop => Notifier.find(target, prop));
   }
   return tracker.add(callback);
 }
 
-function watchProp<T>(target: T, prop: Extract<keyof T, string>, callback: Reaction): Disposable {
+function watchProp<T>(target: T, prop: Extract<keyof T, string>, callback: Notify): Disposable {
   const data = getOrigin(target);
-  const tracker = Tracker.find(data, prop);
+  const tracker = Notifier.find(data, prop);
   if (tracker) {
     return tracker.add(callback);
   }
@@ -27,14 +28,14 @@ function watchProp<T>(target: T, prop: Extract<keyof T, string>, callback: React
   return Disposable.NONE;
 }
 
-export function watch<T>(target: T, callback: Reaction): Disposable;
-export function watch<T>(target: T, prop: Extract<keyof T, string>, callback: Reaction): Disposable;
+export function watch<T>(target: T, callback: Notify): Disposable;
+export function watch<T>(target: T, prop: Extract<keyof T, string>, callback: Notify): Disposable;
 export function watch<T>(
   target: T,
-  prop: Extract<keyof T, string> | Reaction,
-  callback?: Reaction,
+  prop: Extract<keyof T, string> | Notify,
+  callback?: Notify,
 ): Disposable {
-  let cb: Reaction;
+  let cb: Notify;
   if (typeof prop === 'function') {
     cb = prop;
     return watchAll(target, cb);

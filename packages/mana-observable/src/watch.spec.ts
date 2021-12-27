@@ -22,7 +22,6 @@ describe('watch', () => {
     watchLatest = foo.name;
     watch(foo, 'name', () => {
       watchLatest = foo.name;
-      console.log(foo, watchLatest, foo.name);
       assert(watchLatest === newName);
       done();
     });

@@ -5,6 +5,6 @@ import { ObservableProperties } from './utils';
  */
 export function prop() {
   return (target: Record<any, any>, propertyKey: string) => {
-    ObservableProperties.add(target, propertyKey);
+    ObservableProperties.add(target.constructor, propertyKey);
   };
 }

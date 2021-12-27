@@ -3,16 +3,10 @@ import 'regenerator-runtime/runtime';
 
 import 'react';
 import assert from 'assert';
-import { defaultObservableContext } from './context';
-import { GlobalContainer } from 'mana-syringe';
 import { Reactable } from './reactivity';
 import { isPlainObject } from 'mana-common';
 
 describe('reactivity', () => {
-  defaultObservableContext.config({
-    getContainer: () => GlobalContainer,
-  });
-
   it('#transform base', () => {
     const [tValue, reactor] = Reactable.transform(undefined);
     assert(tValue === undefined);
@@ -62,6 +56,7 @@ describe('reactivity', () => {
         changedTimes += 1;
       });
     }
+    // Pushing brings changes, one is the set value and the other is the set length
     tValue.push('a');
     tValue.pop();
     assert(tValue.length === 0);
@@ -86,16 +81,13 @@ describe('reactivity', () => {
     assert(changedTimes === 4);
   });
 
-  it('#reactable plain object', done => {
+  it('#reactable plain object', () => {
     const v = {};
     const [tValue, reactor] = Reactable.transform(v);
     let changedTimes = 0;
     if (reactor) {
       reactor.onChange(() => {
         changedTimes += 1;
-        if (changedTimes === 3) {
-          done();
-        }
       });
     }
     tValue.a = 'a';

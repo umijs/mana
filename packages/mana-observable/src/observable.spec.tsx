@@ -1,56 +1,40 @@
 import 'regenerator-runtime/runtime';
 import 'react';
-import { GlobalContainer } from 'mana-syringe';
 import assert from 'assert';
-import { defaultObservableContext } from './context';
 import { observable } from './observable';
-import { Tracker } from './tracker';
-import { Observable, ObservableProperties } from './utils';
+import { Notifier } from './notifier';
+import { Observability, ObservableProperties } from './utils';
 import { prop } from './decorator';
 import { Reactable } from './reactivity';
 
 describe('observable', () => {
-  defaultObservableContext.config({
-    getContainer: () => GlobalContainer,
-  });
   it('#observable properties', () => {
-    class ClassBasic {
+    class Foo {
       @prop() name: string = '';
-      constructor() {
-        observable(this);
-      }
     }
-    const instanceBasic = new ClassBasic();
+    const instanceBasic = observable(new Foo());
+    const nullInstance = observable(null as any);
+    assert(!Observability.is(nullInstance));
+    assert(Observability.is(instanceBasic));
+    assert(Observability.is(instanceBasic, 'name'));
     assert(ObservableProperties.get(instanceBasic)?.includes('name'));
-    assert(Observable.is(instanceBasic, 'name'));
   });
   it('#extends properties', () => {
     class ClassBasic {
       @prop() name: string = '';
       name1: string = '';
       name2: string = '';
-      constructor() {
-        observable(this);
-      }
     }
     class ClassBasic1 extends ClassBasic {
       @prop() name1: string = '';
-      constructor() {
-        super();
-        observable(this);
-      }
     }
     class ClassBasic2 extends ClassBasic1 {
       name1: string = '';
       @prop() name2: string = '';
-      constructor() {
-        super();
-        observable(this);
-      }
     }
-    const instanceBasic = new ClassBasic();
-    const instanceBasic1 = new ClassBasic1();
-    const instanceBasic2 = new ClassBasic2();
+    const instanceBasic = observable(new ClassBasic());
+    const instanceBasic1 = observable(new ClassBasic1());
+    const instanceBasic2 = observable(new ClassBasic2());
     assert(ObservableProperties.get(instanceBasic)?.includes('name'));
     assert(ObservableProperties.get(instanceBasic)?.length === 1);
     assert(ObservableProperties.get(instanceBasic1)?.includes('name'));
@@ -64,13 +48,10 @@ describe('observable', () => {
   it('#basic usage', () => {
     class ClassBasic {
       @prop() name: string = '';
-      constructor() {
-        observable(this);
-      }
     }
-    const instanceBasic = new ClassBasic();
+    const instanceBasic = observable(new ClassBasic());
     let changed = false;
-    const tracker = Tracker.find(instanceBasic, 'name');
+    const tracker = Notifier.find(instanceBasic, 'name');
     tracker?.add(() => {
       changed = true;
     });
@@ -82,11 +63,8 @@ describe('observable', () => {
   it('#array usage', () => {
     class ClassArray {
       @prop() list: string[] = [];
-      constructor() {
-        observable(this);
-      }
     }
-    const instanceArray = new ClassArray();
+    const instanceArray = observable(new ClassArray());
     let changed = false;
     if (Reactable.is(instanceArray.list)) {
       const reactor = Reactable.get(instanceArray.list);
@@ -94,7 +72,7 @@ describe('observable', () => {
         changed = true;
       });
     }
-    const tracker = Tracker.find(instanceArray, 'list');
+    const tracker = Notifier.find(instanceArray, 'list');
     tracker?.add(() => {
       changed = true;
     });
@@ -107,26 +85,38 @@ describe('observable', () => {
   it('#child class', done => {
     class Foo {
       @prop() fooName: string = 'foo';
-      constructor() {
-        observable(this);
-      }
     }
     class Bar extends Foo {
       @prop() barName?: string;
       @prop() barInfo?: string;
-      constructor() {
-        super();
-        observable(this);
-      }
     }
-    const bar = new Bar();
+    const bar = observable(new Bar());
     let changed = false;
-    const tracker = Tracker.find(bar, 'fooName');
+    const tracker = Notifier.find(bar, 'fooName');
     tracker?.add(() => {
       changed = true;
       assert(changed);
       done();
     });
     bar.fooName = 'foo name';
+  });
+
+  it('#shared properties', () => {
+    class Foo {
+      @prop() list: string[] = [];
+    }
+    class Bar {
+      @prop() list: string[] = [];
+    }
+    const foo = observable(new Foo());
+    const bar = observable(new Bar());
+    foo.list = bar.list;
+    let changed = false;
+    const notifier = Notifier.find(bar, 'list');
+    notifier?.add(() => {
+      changed = true;
+    });
+    foo.list.push('');
+    assert(changed);
   });
 });

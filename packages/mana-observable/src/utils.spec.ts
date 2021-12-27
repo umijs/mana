@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import 'reflect-metadata';
 import assert from 'assert';
-import { getDesignType, ObservableProperties, Observable } from './utils';
+import { getDesignType, ObservableProperties, Observability, InstanceValue } from './utils';
 import { prop } from './decorator';
 
 describe('utils', () => {
@@ -10,19 +10,23 @@ describe('utils', () => {
       info = '';
     }
     const foo = new Foo();
-    ObservableProperties.add(Foo, 'name');
-    assert(!Observable.tarckable(null));
-    assert(!Observable.is(null, 'name'));
-    assert(Observable.tarckable({}));
-    Observable.mark(foo, 'info');
-    assert(Observable.is(foo, 'info'));
+    assert(!Observability.trackable(null));
+    assert(!Observability.is(null, 'name'));
+    assert(Observability.trackable({}));
+    Observability.mark(foo, 'info');
+    Observability.mark(foo);
+    assert(Observability.is(foo, 'info'));
+    assert(Observability.is(foo));
+    assert(Observability.trackable(foo));
+    assert(Observability.notifiable(foo, 'info'));
   });
   it('#ObservableProperties', () => {
     class ClassBasic {
       name = '';
+    }
+    class ClassBasic1 extends ClassBasic {
       name1 = '';
     }
-    class ClassBasic1 extends ClassBasic {}
     const instanceBasic = new ClassBasic();
     let properties = ObservableProperties.get(instanceBasic);
     assert(!properties);
@@ -36,9 +40,21 @@ describe('utils', () => {
     assert(properties.includes('name1'));
     properties = ObservableProperties.get(instanceBasic);
     assert(!properties);
-    ObservableProperties.setInstance(instanceBasic);
+    assert(!ObservableProperties.find({}));
+    assert(!ObservableProperties.find(null as any));
+    const instanceProperties = ObservableProperties.find(instanceBasic) || [];
+    assert(instanceProperties.includes('name'));
+    instanceProperties.forEach(property => {
+      ObservableProperties.add(instanceBasic, property);
+    });
     properties = ObservableProperties.getOwn(instanceBasic);
     assert(properties?.length === 1);
+  });
+
+  it('#InstanceValue', () => {
+    const foo = {};
+    InstanceValue.set(foo, 'name', 'foo');
+    assert(InstanceValue.get(foo, 'name') === 'foo');
   });
   it('#getDesignType', () => {
     class ClassBasic {
