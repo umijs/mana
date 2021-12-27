@@ -1,8 +1,10 @@
 import type { Disposable } from 'mana-common';
+import { isPlainObject } from 'mana-common';
 import { getPropertyDescriptor } from 'mana-common';
 import { observable } from '.';
 import { ObservableSymbol } from './core';
 import { Notifier } from './notifier';
+import { Reactable } from './reactivity';
 import { Observability } from './utils';
 
 type Act = (...args: any) => void;
@@ -74,6 +76,60 @@ export namespace Tracker {
     }
   }
 
+  export function tramsform(reactable: Reactable, act: Act) {
+    if (reactable instanceof Array) {
+      return transformArray(reactable, act);
+    }
+    if (reactable instanceof Map) {
+      return transformMap(reactable, act);
+    }
+    if (isPlainObject(reactable)) {
+      return transformPlainObject(reactable, act);
+    }
+    return reactable;
+  }
+  export function transformArray(toTrack: any[], act: Act) {
+    return new Proxy(toTrack, {
+      get(target: any, property: string | symbol): any {
+        const value = target[property];
+        if (Observability.trackable(value)) {
+          return track(value, act);
+        }
+        return value;
+      },
+    });
+  }
+
+  export function transformPlainObject(toTrack: any, act: Act) {
+    return new Proxy(toTrack, {
+      get(target: any, property: string | symbol): any {
+        const value = target[property];
+        if (Observability.trackable(value)) {
+          return track(value, act);
+        }
+        return value;
+      },
+    });
+  }
+
+  export function transformMap(toReactable: Map<any, any>, act: Act) {
+    return new Proxy(toReactable, {
+      get(target: any, property: string | symbol): any {
+        const value = target[property];
+        if (property === 'get' && typeof value === 'function') {
+          return function (...args: any[]) {
+            const innerValue = value.apply(target, args);
+            if (Observability.trackable(innerValue)) {
+              return track(innerValue, act);
+            }
+            return innerValue;
+          };
+        }
+        return value;
+      },
+    });
+  }
+
   export function track<T extends Record<any, any>>(object: T, act: Act): T {
     if (!Observability.trackable(object)) {
       return object;
@@ -101,6 +157,9 @@ export namespace Tracker {
           }
         }
         const value = getValue(target, property, proxy, notifier);
+        if (Reactable.is(value)) {
+          return tramsform(value, act);
+        }
         if (Observability.trackable(value)) {
           return track(value, act);
         }

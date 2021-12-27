@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'regenerator-runtime/runtime';
-
 import 'react';
 import assert from 'assert';
 import { Reactable } from './reactivity';
