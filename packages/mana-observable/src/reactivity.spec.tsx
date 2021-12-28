@@ -4,17 +4,33 @@ import 'react';
 import assert from 'assert';
 import { Reactable } from './reactivity';
 import { isPlainObject } from 'mana-common';
+import { Observability } from './utils';
 
 describe('reactivity', () => {
+  it('#can be reactable', () => {
+    class Foo {}
+    const a = new Foo();
+    assert(!Reactable.canBeReactable(a));
+    assert(!Reactable.canBeReactable(null));
+    assert(!Reactable.canBeReactable(undefined));
+    assert(Reactable.canBeReactable([]));
+    assert(Reactable.canBeReactable({}));
+    assert(Reactable.canBeReactable(new Map()));
+    const [arrValue] = Reactable.transform([]);
+    assert(Reactable.canBeReactable(arrValue));
+  });
   it('#transform base', () => {
     const [tValue, reactor] = Reactable.transform(undefined);
     assert(tValue === undefined);
     assert(reactor === undefined);
     const arr = ['a'];
     const [arrValue, arrReactor] = Reactable.transform(arr);
+    const [arrValue1, arrReactor1] = Reactable.transform(arr);
     assert(arrReactor);
     assert(arrValue !== arr);
     assert(arrReactor?.value === arr);
+    assert(arrValue1 === arrValue);
+    assert(arrReactor1 === arrReactor);
     const [arrValue2, arrReactor2] = Reactable.transform(arrValue);
     assert(arrReactor === arrReactor2);
     assert(arrValue === arrValue2);
@@ -30,6 +46,7 @@ describe('reactivity', () => {
     const [tValue] = Reactable.transform(v);
     assert(tValue instanceof Array);
     assert(Reactable.is(tValue));
+    assert(Observability.getOrigin(tValue) === v);
   });
 
   it('#transform map', () => {
@@ -37,6 +54,7 @@ describe('reactivity', () => {
     const [tValue] = Reactable.transform(v);
     assert(tValue instanceof Map);
     assert(Reactable.is(tValue));
+    assert(Observability.getOrigin(tValue) === v);
   });
 
   it('#transform plain object', () => {
@@ -44,6 +62,7 @@ describe('reactivity', () => {
     const [tValue] = Reactable.transform(v);
     assert(isPlainObject(tValue));
     assert(Reactable.is(tValue));
+    assert(Observability.getOrigin(tValue) === v);
   });
 
   it('#reactable array', () => {

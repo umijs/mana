@@ -158,7 +158,7 @@ describe('context', () => {
     });
     act(() => {
       const json = component.toJSON();
-
+      console.log(json);
       assert(!(json instanceof Array) && json && json.children?.find(item => item === '1'));
       done();
     });

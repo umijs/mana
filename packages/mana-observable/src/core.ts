@@ -7,7 +7,7 @@ export namespace ObservableSymbol {
   export const Notifier = Symbol('Notifier');
   export const Observable = Symbol('Observable');
   export const ObservableProperties = Symbol('ObservableProperties');
-  export const ObjectSelf = Symbol('ObjectSelf');
+  export const Self = Symbol('Self');
 }
 
 export type Notify = (target?: any, prop?: any) => void;

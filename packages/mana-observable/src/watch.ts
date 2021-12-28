@@ -15,14 +15,14 @@ function watchAll<T>(target: T, callback: Notify): Disposable {
   if (props) {
     props.forEach(prop => Notifier.find(target, prop));
   }
-  return tracker.add(callback);
+  return tracker.onChange(callback);
 }
 
 function watchProp<T>(target: T, prop: Extract<keyof T, string>, callback: Notify): Disposable {
   const data = getOrigin(target);
   const tracker = Notifier.find(data, prop);
   if (tracker) {
-    return tracker.add(callback);
+    return tracker.onChange(callback);
   }
   console.warn(`Cannot add watcher for unobservable property ${prop.toString()}`, target);
   return Disposable.NONE;

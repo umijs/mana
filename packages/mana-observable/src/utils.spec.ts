@@ -3,13 +3,32 @@ import 'reflect-metadata';
 import assert from 'assert';
 import { getDesignType, ObservableProperties, Observability, InstanceValue } from './utils';
 import { prop } from './decorator';
+import { Disposable } from 'mana-common/dist';
+import { ObservableSymbol } from '.';
 
 describe('utils', () => {
-  it('#Observable', () => {
+  it('#Observability', () => {
     class Foo {
       info = '';
     }
     const foo = new Foo();
+    const meta = 'meta';
+    Observability.setDisposable(meta, Disposable.NONE, foo);
+    Observability.setDisposable(meta, Disposable.NONE, foo, 'info');
+    const toDispose = Observability.getDisposable(meta, foo);
+    const toDispose1 = Observability.getDisposable(meta, foo, 'info');
+    const fooProxy = new Proxy(foo, {
+      get: (target, propertyKey) => {
+        if (propertyKey === ObservableSymbol.Self) {
+          return target;
+        }
+        return (target as any)[propertyKey];
+      },
+    });
+    assert(toDispose === Disposable.NONE);
+    assert(toDispose1 === Disposable.NONE);
+    assert(Observability.getOrigin(fooProxy) === foo);
+    assert(Observability.getOrigin(null) === null);
     assert(!Observability.trackable(null));
     assert(!Observability.is(null, 'name'));
     assert(Observability.trackable({}));

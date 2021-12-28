@@ -1,8 +1,8 @@
 /* eslint-disable prefer-spread */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Emitter, isPlainObject } from 'mana-common';
 import { ObservableSymbol } from './core';
+import { Observability } from './utils';
 
 /**
  * Reactor is bound to an reacable object, such as array/map/object.
@@ -33,29 +33,58 @@ export interface Reactable {
 
 export namespace Reactable {
   export function is(target: any): target is Reactable {
-    return !!target && typeof target === 'object' && (target as any)[ObservableSymbol.Reactor];
+    return Observability.trackable(target) && (target as any)[ObservableSymbol.Reactor];
   }
-  export function get(target: Reactable): Reactor {
+  export function getReactor(target: Reactable): Reactor {
     return target[ObservableSymbol.Reactor];
+  }
+  export function set(target: any, value: Reactable): void {
+    Reflect.defineMetadata(ObservableSymbol.Reactor, value, target);
+  }
+
+  export function get<T>(target: T): T & Reactable {
+    return Reflect.getMetadata(ObservableSymbol.Reactor, target);
+  }
+  export function canBeReactable(value: any): boolean {
+    if (!value) return false;
+    if (is(value)) {
+      return true;
+    }
+    if (value instanceof Array) {
+      return true;
+    }
+    if (value instanceof Map) {
+      return true;
+    }
+    if (isPlainObject(value)) {
+      return true;
+    }
+    return false;
   }
   export function transform(value: any): [any, Reactor | undefined] {
     let reactor: Reactor | undefined = undefined;
-    if (!value) return [value, undefined];
+    if (!Observability.trackable(value)) return [value, undefined];
     if (is(value)) {
-      reactor = get(value);
+      reactor = getReactor(value);
       return [value, reactor];
     }
+    const exsit = get(value);
+    if (exsit) {
+      return [exsit, getReactor(exsit)];
+    }
+    let reactable;
     if (value instanceof Array) {
-      const v = transformArray(value);
-      return [v, get(v)];
+      reactable = transformArray(value);
     }
     if (value instanceof Map) {
-      const v = transformMap(value);
-      return [v, get(v)];
+      reactable = transformMap(value);
     }
     if (isPlainObject(value)) {
-      const v = transformPlainObject(value);
-      return [v, get(v)];
+      reactable = transformPlainObject(value);
+    }
+    if (reactable) {
+      set(value, reactable);
+      return [reactable, getReactor(reactable)];
     }
     return [value, undefined];
   }
@@ -66,6 +95,9 @@ export namespace Reactable {
       get(self: any, prop: string | symbol): any {
         if (prop === ObservableSymbol.Reactor) {
           return reactor;
+        }
+        if (prop === ObservableSymbol.Self) {
+          return self;
         }
         const result = Reflect.get(self, prop);
         return result;
@@ -84,6 +116,9 @@ export namespace Reactable {
       get(self: any, prop: string | symbol): any {
         if (prop === ObservableSymbol.Reactor) {
           return reactor;
+        }
+        if (prop === ObservableSymbol.Self) {
+          return self;
         }
         const result = Reflect.get(self, prop);
         return result;
@@ -107,6 +142,9 @@ export namespace Reactable {
       get(self: any, prop: string | symbol): any {
         if (prop === ObservableSymbol.Reactor) {
           return reactor;
+        }
+        if (prop === ObservableSymbol.Self) {
+          return self;
         }
         switch (prop) {
           case 'set':

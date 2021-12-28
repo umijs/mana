@@ -1,14 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Disposable } from 'mana-common';
 import type { Reactor } from './reactivity';
 import { Reactable } from './reactivity';
 import { InstanceValue, ObservableProperties, Observability } from './utils';
 import { Notifier } from './notifier';
 
-// redefine observable properties
+//
+export function listenReactor(
+  reactor: Reactor,
+  onChange: () => void,
+  target: any,
+  property?: string,
+) {
+  const toDispose = Observability.getDisposable(reactor, target, property);
+  if (toDispose) {
+    toDispose.dispose();
+  }
+  const disposable = reactor.onChange(() => {
+    onChange();
+  });
+  Observability.setDisposable(reactor, disposable, target, property);
+}
 
+// redefine observable properties
 export function defineProperty(target: any, property: string, defaultValue?: any) {
-  let reactorListenDispose: Disposable;
   /**
    * notify reactor when property changed
    */
@@ -23,12 +37,7 @@ export function defineProperty(target: any, property: string, defaultValue?: any
   const setValue = (value: any, reactor: Reactor | undefined) => {
     InstanceValue.set(target, property, value);
     if (reactor) {
-      if (reactorListenDispose) {
-        reactorListenDispose.dispose();
-      }
-      reactorListenDispose = reactor.onChange(() => {
-        onChange();
-      });
+      listenReactor(reactor, onChange, target, property);
     }
   };
   const initialValue = target[property] === undefined ? defaultValue : target[property];
@@ -42,8 +51,18 @@ export function defineProperty(target: any, property: string, defaultValue?: any
   const setter = function setter(this: any, value: any): void {
     const [tValue, reactor] = Reactable.transform(value);
     const oldValue = InstanceValue.get(target, property);
+    if (Reactable.is(oldValue)) {
+      const toDispose = Observability.getDisposable(
+        Reactable.getReactor(oldValue),
+        target,
+        property,
+      );
+      if (toDispose) {
+        toDispose.dispose();
+      }
+    }
     setValue(tValue, reactor);
-    if (value !== oldValue) {
+    if (tValue !== oldValue) {
       onChange();
     }
   };
@@ -65,9 +84,26 @@ export function defineProperty(target: any, property: string, defaultValue?: any
 export function observable<T extends Record<any, any>>(target: T): T {
   if (!Observability.trackable(target)) return target;
   const properties = ObservableProperties.find(target);
+  const origin = Observability.getOrigin(target);
   if (!properties) {
+    if (Reactable.canBeReactable(target)) {
+      if (Observability.is(target)) {
+        return target;
+      }
+      const onChange = () => {
+        Notifier.trigger(origin);
+      };
+      const [reatableValue, reactor] = Reactable.transform(origin);
+      if (reactor) {
+        reactor.onChange(() => {
+          onChange();
+        });
+      }
+      Observability.mark(origin);
+      return reatableValue;
+    }
     return target;
   }
-  properties.forEach(property => defineProperty(target, property));
-  return target;
+  properties.forEach(property => defineProperty(origin, property));
+  return origin;
 }

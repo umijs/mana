@@ -2,10 +2,11 @@
 
 import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
-import React from 'react';
+import React, { useEffect } from 'react';
 import assert from 'assert';
 import { useObserve } from './hooks';
 import renderer, { act } from 'react-test-renderer';
+import { observable, useObservableState } from '.';
 import { prop } from './decorator';
 
 describe('use', () => {
@@ -100,6 +101,48 @@ describe('use', () => {
     act(() => {
       const json = component.toJSON();
       assert(!(json instanceof Array) && json && json.children?.find(item => item === '1'));
+      done();
+    });
+  });
+
+  it('#useObserve reactable array', done => {
+    const ARR: any[] = observable([]);
+    const Render = () => {
+      const arr = useObserve(ARR);
+      const arr1 = useObservableState<string[]>([]);
+      useEffect(() => {
+        arr.push('effect');
+        arr1.push('effect1');
+      }, [arr, arr1]);
+      return (
+        <div>
+          {JSON.stringify(arr)}
+          {arr1[0]}
+          {arr.length}
+        </div>
+      );
+    };
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(
+        <>
+          <Render />
+        </>,
+      );
+      const json = component.toJSON();
+      assert(json === null);
+    });
+    act(() => {
+      ARR.push('a');
+    });
+    act(() => {
+      const json = component.toJSON();
+      assert(
+        !(json instanceof Array) &&
+          json &&
+          json.children?.includes('2') &&
+          json.children?.includes('effect1'),
+      );
       done();
     });
   });

@@ -38,10 +38,6 @@ export class Notifier implements Disposable {
     this.disposed = true;
   }
 
-  add(trigger: Notify): Disposable {
-    return this.onChange(trigger);
-  }
-
   once(trigger: Notify): Disposable {
     const toDispose = this.onChange(e => {
       trigger(e.target, e.prop);
@@ -64,10 +60,11 @@ export class Notifier implements Disposable {
     }
   }
   static getOrCreate(target: any, prop?: any): Notifier {
+    const origin = Observability.getOrigin(target);
     const exist = getNotifier(target, prop);
     if (!exist || exist.disposed) {
       const notifier = new Notifier();
-      setNotifier(notifier, target, prop);
+      setNotifier(notifier, origin, prop);
       return notifier;
     }
     return exist;

@@ -1,19 +1,25 @@
 import 'reflect-metadata';
+import type { Disposable } from 'mana-common';
 import { ObservableSymbol } from './core';
+
+interface Original {
+  [ObservableSymbol.Self]: any;
+}
 
 export namespace Observability {
   export function trackable(obj: any): boolean {
     return !!obj && typeof obj === 'object';
   }
   export function notifiable(obj: any, property: string | symbol): boolean {
-    return trackable(obj) && is(obj, property);
+    return is(obj, property);
   }
   export function is(obj: any, property?: string | symbol): boolean {
     if (!trackable(obj)) return false;
+    const origin = getOrigin(obj);
     if (property) {
-      return Reflect.hasMetadata(ObservableSymbol.Observable, obj, property);
+      return Reflect.hasMetadata(ObservableSymbol.Observable, origin, property);
     }
-    return Reflect.hasMetadata(ObservableSymbol.Observable, obj);
+    return Reflect.hasMetadata(ObservableSymbol.Observable, origin);
   }
   export function mark(obj: Record<any, any>, property?: string | symbol) {
     if (property) {
@@ -21,6 +27,33 @@ export namespace Observability {
     } else {
       Reflect.defineMetadata(ObservableSymbol.Observable, true, obj);
     }
+  }
+
+  function isOriginal(data: any): data is Original {
+    return Observability.trackable(data) && data[ObservableSymbol.Self];
+  }
+
+  export function getOrigin(obj: any): any {
+    if (!isOriginal(obj)) return obj;
+    return obj[ObservableSymbol.Self];
+  }
+  export function getDisposable(metaKey: any, obj: Record<string, any>, property?: string) {
+    if (property) {
+      return Reflect.getOwnMetadata(metaKey, obj, property);
+    }
+    return Reflect.getOwnMetadata(metaKey, obj);
+  }
+
+  export function setDisposable(
+    metaKey: any,
+    disposable: Disposable,
+    obj: Record<string, any>,
+    property?: string,
+  ) {
+    if (property) {
+      Reflect.defineMetadata(metaKey, disposable, obj, property);
+    }
+    Reflect.defineMetadata(metaKey, disposable, obj);
   }
 }
 

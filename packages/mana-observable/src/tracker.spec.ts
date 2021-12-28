@@ -2,12 +2,14 @@ import 'regenerator-runtime/runtime';
 import assert from 'assert';
 import { Trackable, Tracker } from './tracker';
 import { prop } from './decorator';
+import { Observability } from './utils';
 describe('Tracker', () => {
   it('#trackable', () => {
     class Foo {}
     const foo = new Foo();
     const f = Tracker.track(foo, () => {});
     assert(Trackable.is(f));
+    assert(Observability.getOrigin(f) === foo);
     assert(Trackable.tryGetOrigin(f) === foo);
     assert(null === Trackable.tryGetOrigin(null));
   });
@@ -34,7 +36,7 @@ describe('Tracker', () => {
     assert(changeTimes === 2);
   });
 
-  it('#track deep', () => {
+  it('#track observable deep', () => {
     class Foo {
       @prop() info = '';
     }
@@ -48,6 +50,7 @@ describe('Tracker', () => {
     };
     const b = Tracker.track(bar, reaction);
     b.foo.info;
+    // bar.foo.info = 'foo';
     b.foo.info = 'foo';
     assert(changeTimes === 1);
   });
@@ -76,7 +79,7 @@ describe('Tracker', () => {
     assert(changeTimes === 2);
   });
 
-  it('#tracker by reactable array', () => {
+  it('#track reactable array', () => {
     class Foo {
       @prop() info = '';
     }
@@ -97,7 +100,7 @@ describe('Tracker', () => {
     assert(changeTimes === 1);
   });
 
-  it('#tracker by reactable map', () => {
+  it('#track reactable map', () => {
     class Foo {
       @prop() info = '';
     }
@@ -120,7 +123,7 @@ describe('Tracker', () => {
     assert(changeTimes === 1);
   });
 
-  it('#tracker by reactable object', () => {
+  it('#track reactable object', () => {
     class Foo {
       @prop() info = '';
     }
@@ -141,7 +144,52 @@ describe('Tracker', () => {
     assert(changeTimes === 2);
   });
 
+  it('#track deep', () => {
+    class Foo {
+      @prop() info = '';
+    }
+    class Bar {
+      foo = new Foo();
+    }
+    const info = { bar: new Bar() };
+    let changeTimes: number = 0;
+    const reaction = () => {
+      changeTimes += 1;
+    };
+    const i = Tracker.track(info, reaction);
+    i.bar.foo.info;
+    i.bar.foo.info = 'foo';
+    assert(changeTimes === 1);
+  });
+
   it('#tracker transform', () => {
     assert(Tracker.tramsform(null as any, () => {}) === null);
+  });
+
+  it('#track plain object', () => {
+    const info = { name: 'info', age: 18 };
+    let changeTimes: number = 0;
+    const reaction = () => {
+      changeTimes += 1;
+    };
+    const i = Tracker.track(info, reaction);
+    i.name = 'foo';
+    assert(changeTimes === 1);
+  });
+  it('#track array', () => {
+    const arr: any[] = ['track array'];
+    let changeTimes: number = 0;
+    const reaction = () => {
+      Tracker.track(arr, reaction);
+      changeTimes += 1;
+    };
+    const a = Tracker.track(arr, reaction);
+    const a1 = Tracker.track(arr, reaction);
+    assert(a === a1);
+    a.push('a');
+    a1.push('a1');
+    const a2 = Tracker.track(arr, reaction);
+    a2.push('a2');
+    assert(changeTimes === 6);
   });
 });

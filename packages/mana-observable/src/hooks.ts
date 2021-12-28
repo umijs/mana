@@ -6,8 +6,14 @@ interface Action<T> {
   key: keyof T;
   value: any;
 }
-const reducer = <T>(state: Partial<T>, part: Action<T>) => {
-  return { ...state, [part.key]: part.value };
+function isAction(data: Record<string, any> | undefined): data is Action<any> {
+  return !!data && data.key !== undefined && data.value !== undefined;
+}
+const reducer = <T>(state: Partial<T>, part: Action<T> | undefined) => {
+  if (isAction(part)) {
+    return { ...state, [part.key]: part.value };
+  }
+  return { ...state };
 };
 
 export function useObserve<T>(obj: T): T {
@@ -16,4 +22,11 @@ export function useObserve<T>(obj: T): T {
     {},
   );
   return Tracker.track(obj, dispatch);
+}
+
+export function useObservableState<T>(initialValue: T): T {
+  const object = React.useMemo(() => {
+    return initialValue;
+  }, []);
+  return useObserve(object);
 }

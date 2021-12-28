@@ -12,7 +12,8 @@ describe('observable', () => {
     class Foo {
       @prop() name: string = '';
     }
-    const instanceBasic = observable(new Foo());
+    const foo = observable(new Foo());
+    const instanceBasic = observable(foo);
     const nullInstance = observable(null as any);
     assert(!Observability.is(nullInstance));
     assert(Observability.is(instanceBasic));
@@ -52,7 +53,7 @@ describe('observable', () => {
     const instanceBasic = observable(new ClassBasic());
     let changed = false;
     const tracker = Notifier.find(instanceBasic, 'name');
-    tracker?.add(() => {
+    tracker?.onChange(() => {
       changed = true;
     });
     instanceBasic.name = 'a';
@@ -65,15 +66,17 @@ describe('observable', () => {
       @prop() list: string[] = [];
     }
     const instanceArray = observable(new ClassArray());
+    instanceArray.list = instanceArray.list;
+    instanceArray.list = [];
     let changed = false;
     if (Reactable.is(instanceArray.list)) {
-      const reactor = Reactable.get(instanceArray.list);
+      const reactor = Reactable.getReactor(instanceArray.list);
       reactor.onChange(() => {
         changed = true;
       });
     }
     const tracker = Notifier.find(instanceArray, 'list');
-    tracker?.add(() => {
+    tracker?.onChange(() => {
       changed = true;
     });
     instanceArray.list.push('');
@@ -93,7 +96,7 @@ describe('observable', () => {
     const bar = observable(new Bar());
     let changed = false;
     const tracker = Notifier.find(bar, 'fooName');
-    tracker?.add(() => {
+    tracker?.onChange(() => {
       changed = true;
       assert(changed);
       done();
@@ -113,10 +116,29 @@ describe('observable', () => {
     foo.list = bar.list;
     let changed = false;
     const notifier = Notifier.find(bar, 'list');
-    notifier?.add(() => {
+    notifier?.onChange(() => {
       changed = true;
     });
     foo.list.push('');
+    assert(changed);
+  });
+
+  it('#observable reactbale', () => {
+    const v: any[] = [];
+    class Foo {}
+    const foo = new Foo();
+    const reactable = observable(v);
+    const reactable1 = observable(reactable);
+    const observableFoo = observable(foo);
+    assert(Reactable.is(reactable));
+    assert(Observability.is(v));
+    assert(observableFoo === foo);
+    let changed = false;
+    const notifier = Notifier.find(reactable);
+    notifier?.onChange(() => {
+      changed = true;
+    });
+    reactable1.push('');
     assert(changed);
   });
 });

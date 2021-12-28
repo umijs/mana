@@ -44,36 +44,36 @@ export namespace Trackable {
 }
 export namespace Tracker {
   export function set<T = any>(target: T, act: Act, proxy: T) {
-    Reflect.defineMetadata(act, proxy, target);
+    Reflect.defineMetadata(act, proxy, target, ObservableSymbol.Tracker);
   }
-  export function get<T = any>(target: T, act: Act) {
-    return Reflect.getMetadata(act, target);
+  export function get<T = any>(target: T, act: Act): (T & Trackable) | undefined {
+    return Reflect.getMetadata(act, target, ObservableSymbol.Tracker);
   }
   export function has<T = any>(target: T, act: Act) {
-    return Reflect.hasOwnMetadata(act, target);
+    return Reflect.hasOwnMetadata(act, target, ObservableSymbol.Tracker);
   }
 
   function handleNotifier<T extends Record<string, any>>(
-    obj: T,
-    property: string,
     notifier: Notifier,
     act: Act,
+    obj: T,
+    property?: string,
   ) {
-    if (notifier && typeof property === 'string') {
-      const reactionDispose: Disposable = Reflect.getOwnMetadata(act, obj, property);
-      if (reactionDispose) {
-        reactionDispose.dispose();
-      }
-      if (notifier) {
-        const toDispose = notifier.once(() => {
-          act({
-            key: property as keyof T,
-            value: obj[property],
-          });
-        });
-        Reflect.defineMetadata(act, toDispose, obj, property);
-      }
+    const lastToDispose: Disposable = Observability.getDisposable(act, obj, property);
+    if (lastToDispose) {
+      lastToDispose.dispose();
     }
+    const toDispose = notifier.once(() => {
+      if (property) {
+        act({
+          key: property as keyof T,
+          value: obj[property],
+        });
+      } else {
+        act(obj);
+      }
+    });
+    Observability.setDisposable(act, toDispose, obj, property);
   }
 
   export function tramsform(reactable: Reactable, act: Act) {
@@ -130,30 +130,65 @@ export namespace Tracker {
     });
   }
 
+  export function setReactableNotifier(origin: any, act: Act) {
+    const notifier = Notifier.getOrCreate(origin);
+    handleNotifier(notifier, act, origin);
+  }
+
   export function track<T extends Record<any, any>>(object: T, act: Act): T {
     if (!Observability.trackable(object)) {
       return object;
     }
+    // get origin
     let origin = object;
     if (Trackable.is(object)) {
       origin = Trackable.getOrigin(object);
     }
+    origin = Observability.getOrigin(origin);
+
+    let exist: T | undefined = undefined;
+
+    // already has tracker
     if (has(origin, act)) {
-      return get(origin, act);
+      exist = get(origin, act);
     }
+
+    let maybeReactable = object;
+    // try make observable
     if (!Observability.is(origin)) {
-      observable(origin);
+      maybeReactable = observable(origin);
     }
+    // get exist reactble
+    if (Reactable.canBeReactable(maybeReactable)) {
+      maybeReactable = Reactable.get(origin);
+    }
+    // set reactable listener
+    if (Reactable.is(maybeReactable)) {
+      setReactableNotifier(origin, act);
+      if (!exist) {
+        const proxy = tramsform(maybeReactable, act);
+        set(origin, act, proxy);
+        return proxy;
+      }
+    }
+
+    if (exist) {
+      return exist;
+    }
+
     const proxy = new Proxy(origin, {
       get(target: any, property: string | symbol): any {
         if (property === ObservableSymbol.Tracker) {
+          return target;
+        }
+        if (property === ObservableSymbol.Self) {
           return target;
         }
         let notifier;
         if (typeof property === 'string') {
           if (Observability.notifiable(target, property)) {
             notifier = Notifier.getOrCreate(target, property);
-            handleNotifier(target, property, notifier, act);
+            handleNotifier(notifier, act, target, property);
           }
         }
         const value = getValue(target, property, proxy, notifier);
