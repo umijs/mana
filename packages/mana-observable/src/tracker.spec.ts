@@ -192,4 +192,73 @@ describe('Tracker', () => {
     a2.push('a2');
     assert(changeTimes === 6);
   });
+
+  it('#track map', () => {
+    const map = new Map<string, string>();
+    let changeTimes: number = 0;
+    const reaction = () => {
+      Tracker.track(map, reaction);
+      changeTimes += 1;
+    };
+    const a = Tracker.track(map, reaction);
+    const a1 = Tracker.track(map, reaction);
+    assert(a === a1);
+    a1.set('a', 'a');
+    a1.set('a1', 'a1');
+    assert(changeTimes === 2);
+  });
+
+  it('#track plainObject', () => {
+    const obj: Record<string, any> = {};
+    let changeTimes: number = 0;
+    const reaction = () => {
+      Tracker.track(obj, reaction);
+      changeTimes += 1;
+    };
+    const a = Tracker.track(obj, reaction);
+    const a1 = Tracker.track(obj, reaction);
+    assert(a === a1);
+    a.a = 'a';
+    a1.a1 = 'a1';
+    assert(changeTimes === 2);
+  });
+
+  it('#track plainObject deep', () => {
+    const obj: Record<string, any> = {};
+    obj.info = {};
+    obj.arr = [];
+    let changeTimes: number = 0;
+    const reaction = () => {
+      Tracker.track(obj, reaction);
+      changeTimes += 1;
+    };
+    const a = Tracker.track(obj, reaction);
+    const a1 = Tracker.track(obj, reaction);
+    assert(a === a1);
+    a.a = 'a';
+    a1.info.a1 = 'a1';
+    a1.arr.push('a');
+    assert(changeTimes === 3);
+  });
+  it('#track plainObject deep with class instance', () => {
+    class Foo {
+      @prop() info = '';
+      @prop() info1 = '';
+    }
+    const obj: Record<string, any> = {};
+    obj.foo = new Foo();
+    let changeTimes: number = 0;
+    const reaction = () => {
+      const object = Tracker.track(obj, reaction);
+      object.foo.info;
+      changeTimes += 1;
+    };
+    const a = Tracker.track(obj, reaction);
+    const a1 = Tracker.track(obj, reaction);
+    a1.foo.info;
+    assert(a === a1);
+    a1.foo.info = 'a';
+    a1.foo.info1 = 'a1';
+    assert(changeTimes === 1);
+  });
 });
