@@ -205,5 +205,3 @@ export namespace Tracker {
     return proxy;
   }
 }
-
-export const getOrigin = Trackable.tryGetOrigin;

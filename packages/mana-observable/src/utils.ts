@@ -124,3 +124,5 @@ export type DesignType =
   | typeof Array
   | typeof Map
   | typeof Object;
+
+export const getOrigin = Observability.getOrigin;

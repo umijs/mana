@@ -13,7 +13,7 @@ import { useInject } from './context';
 import renderer, { act } from 'react-test-renderer';
 import { prop } from './decorator';
 import { useObserve } from './hooks';
-import { getOrigin } from './tracker';
+import { getOrigin } from './utils';
 
 console.error = () => {};
 
@@ -158,7 +158,6 @@ describe('context', () => {
     });
     act(() => {
       const json = component.toJSON();
-      console.log(json);
       assert(!(json instanceof Array) && json && json.children?.find(item => item === '1'));
       done();
     });

@@ -1,7 +1,7 @@
 import { Disposable } from 'mana-common';
 import type { Notify } from './core';
 import { Notifier } from './notifier';
-import { getOrigin } from './tracker';
+import { getOrigin } from './utils';
 
 console.warn = () => {};
 
