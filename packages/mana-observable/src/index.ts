@@ -5,5 +5,6 @@ export * from './watch';
 export * from './notifier';
 export * from './observable';
 export * from './reactivity';
+export * from './decorator';
 export * from './utils';
 export * from './core';
