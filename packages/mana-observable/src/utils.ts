@@ -37,6 +37,10 @@ export namespace Observability {
     if (!isOriginal(obj)) return obj;
     return obj[ObservableSymbol.Self];
   }
+  export function equals(a: any, b: any) {
+    return getOrigin(a) === getOrigin(b);
+  }
+
   export function getDisposable(metaKey: any, obj: Record<string, any>, property?: string) {
     if (property) {
       return Reflect.getOwnMetadata(metaKey, obj, property);
@@ -126,3 +130,4 @@ export type DesignType =
   | typeof Object;
 
 export const getOrigin = Observability.getOrigin;
+export const equals = Observability.equals;
