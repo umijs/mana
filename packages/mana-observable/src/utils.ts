@@ -33,7 +33,7 @@ export namespace Observability {
     return Observability.trackable(data) && data[ObservableSymbol.Self];
   }
 
-  export function getOrigin(obj: any): any {
+  export function getOrigin<T = any>(obj: T): T {
     if (!isOriginal(obj)) return obj;
     return obj[ObservableSymbol.Self];
   }

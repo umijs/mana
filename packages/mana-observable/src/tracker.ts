@@ -76,17 +76,17 @@ export namespace Tracker {
     Observability.setDisposable(act, toDispose, obj, property);
   }
 
-  export function tramsform(reactable: Reactable, act: Act) {
-    if (reactable instanceof Array) {
-      return transformArray(reactable, act);
+  export function tramsform(toTrack: any, act: Act) {
+    if (toTrack instanceof Array) {
+      return transformArray(toTrack, act);
     }
-    if (reactable instanceof Map) {
-      return transformMap(reactable, act);
+    if (toTrack instanceof Map) {
+      return transformMap(toTrack, act);
     }
-    if (isPlainObject(reactable)) {
-      return transformPlainObject(reactable, act);
+    if (isPlainObject(toTrack)) {
+      return transformPlainObject(toTrack, act);
     }
-    return reactable;
+    return toTrack;
   }
   export function transformArray(toTrack: any[], act: Act) {
     return new Proxy(toTrack, {
@@ -112,8 +112,8 @@ export namespace Tracker {
     });
   }
 
-  export function transformMap(toReactable: Map<any, any>, act: Act) {
-    return new Proxy(toReactable, {
+  export function transformMap(toTrack: Map<any, any>, act: Act) {
+    return new Proxy(toTrack, {
       get(target: any, property: string | symbol): any {
         const value = target[property];
         if (property === 'get' && typeof value === 'function') {
@@ -135,47 +135,17 @@ export namespace Tracker {
     handleNotifier(notifier, act, origin);
   }
 
-  export function track<T extends Record<any, any>>(object: T, act: Act): T {
-    if (!Observability.trackable(object)) {
-      return object;
-    }
-    // get origin
-    let origin = object;
-    if (Trackable.is(object)) {
-      origin = Trackable.getOrigin(object);
-    }
-    origin = Observability.getOrigin(origin);
-
-    let exist: T | undefined = undefined;
-
-    // already has tracker
-    if (has(origin, act)) {
-      exist = get(origin, act);
-    }
-
-    let maybeReactable = object;
+  export function toInstanceTracker<T extends Record<any, any>>(
+    exist: T | undefined,
+    origin: T,
+    act: Act,
+    deep: boolean = true,
+  ) {
+    if (exist) return exist;
     // try make observable
     if (!Observability.is(origin)) {
-      maybeReactable = observable(origin);
+      observable(origin);
     }
-    // get exist reactble
-    if (Reactable.canBeReactable(maybeReactable)) {
-      maybeReactable = Reactable.get(origin);
-    }
-    // set reactable listener
-    if (Reactable.is(maybeReactable)) {
-      setReactableNotifier(origin, act);
-      if (!exist) {
-        const proxy = tramsform(maybeReactable, act);
-        set(origin, act, proxy);
-        return proxy;
-      }
-    }
-
-    if (exist) {
-      return exist;
-    }
-
     const proxy = new Proxy(origin, {
       get(target: any, property: string | symbol): any {
         if (property === ObservableSymbol.Tracker) {
@@ -196,12 +166,63 @@ export namespace Tracker {
           return tramsform(value, act);
         }
         if (Observability.trackable(value)) {
-          return track(value, act);
+          if (Reactable.canBeReactable(value)) {
+            return track(value, act, false);
+          }
+          return track(value, act, deep);
         }
         return value;
       },
     });
-    set(object, act, proxy);
+    set(origin, act, proxy);
     return proxy;
+  }
+  export function toReactableTracker<T extends Record<any, any>>(
+    exist: T | undefined,
+    origin: T,
+    object: T,
+    act: Act,
+    deep: boolean,
+  ) {
+    let maybeReactable = object;
+    if (deep) {
+      // try make reactable
+      if (!Observability.is(origin)) {
+        maybeReactable = observable(origin);
+      }
+    }
+    maybeReactable = Reactable.get(origin) ?? object;
+    // set reactable listener
+    if (Reactable.is(maybeReactable)) {
+      setReactableNotifier(origin, act);
+    }
+    if (exist) return exist;
+    if (!deep) return object;
+    const proxy = tramsform(maybeReactable, act);
+    set(origin, act, proxy);
+    return proxy;
+  }
+
+  export function track<T extends Record<any, any>>(object: T, act: Act, deep: boolean = true): T {
+    if (!Observability.trackable(object)) {
+      return object;
+    }
+    // get origin
+    let origin = object;
+    if (Trackable.is(object)) {
+      origin = Trackable.getOrigin(object);
+    }
+    origin = Observability.getOrigin(origin);
+    let exist: T | undefined = undefined;
+    // already has tracker
+    if (has(origin, act)) {
+      exist = get(origin, act);
+    }
+    // get exist reactble
+    if (Reactable.canBeReactable(origin)) {
+      return toReactableTracker(exist, origin, object, act, deep);
+    } else {
+      return toInstanceTracker(exist, origin, act, deep);
+    }
   }
 }

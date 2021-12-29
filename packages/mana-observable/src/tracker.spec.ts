@@ -261,4 +261,71 @@ describe('Tracker', () => {
     a1.foo.info1 = 'a1';
     assert(changeTimes === 1);
   });
+
+  it('#track class instance deep with arr', () => {
+    class Bar {
+      @prop() name: string = '';
+    }
+    class Foo {
+      @prop() arr: Bar[] = [];
+    }
+    const foo = new Foo();
+    let changeTimes: number = 0;
+    const reaction = () => {
+      const trackable = Tracker.track(foo, reaction);
+      trackable.arr.forEach(item => item.name);
+      changeTimes += 1;
+    };
+    const a = Tracker.track(foo, reaction);
+    const a1 = Tracker.track(foo, reaction);
+    assert(a === a1);
+    a.arr.forEach(item => item.name);
+    a.arr.push(new Bar()); // 2
+    a1.arr.push(new Bar()); // 2
+    a.arr[0].name = 'a'; // 1
+    assert(changeTimes === 5);
+  });
+
+  it('#track class instance with normal arr', () => {
+    class Foo {
+      arr: string[] = [];
+    }
+    const foo = new Foo();
+    let changeTimes: number = 0;
+    const reaction = () => {
+      const trackable = Tracker.track(foo, reaction);
+      trackable.arr;
+      changeTimes += 1;
+    };
+    const a = Tracker.track(foo, reaction);
+    const a1 = Tracker.track(foo, reaction);
+    assert(a === a1);
+    a.arr.push('a'); // 2
+    a1.arr.push('b'); // 2
+    assert(changeTimes === 0);
+  });
+
+  it('#track class instance with normal arr', () => {
+    class Foo {
+      map = new Map<string, string>();
+      getArr() {
+        return this.map;
+      }
+    }
+    const foo = new Foo();
+    let changeTimes: number = 0;
+    const reaction = () => {
+      const trackable = Tracker.track(foo, reaction);
+      trackable.getArr();
+      changeTimes += 1;
+    };
+    const a = Tracker.track(foo, reaction);
+    const a1 = Tracker.track(foo, reaction);
+    assert(a === a1);
+    a.getArr().set('a', 'a');
+    a1.getArr().set('a1', 'a1');
+    const valueA = a1.getArr().get('a');
+    assert(changeTimes === 0);
+    assert(valueA === 'a');
+  });
 });

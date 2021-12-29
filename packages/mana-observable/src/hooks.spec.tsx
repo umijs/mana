@@ -146,4 +146,41 @@ describe('use', () => {
       done();
     });
   });
+
+  it('#useObserve deep arr', done => {
+    class Bar {
+      @prop() name: string = '';
+    }
+    class Foo {
+      @prop() arr: Bar[] = [];
+    }
+    const foo = new Foo();
+    const Render = () => {
+      const trackableFoo = useObserve(foo);
+      useEffect(() => {
+        trackableFoo.arr.push(new Bar());
+        trackableFoo.arr.push(new Bar());
+      }, [trackableFoo]);
+
+      return <div>{trackableFoo.arr.map(item => item.name)}</div>;
+    };
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(
+        <>
+          <Render />
+        </>,
+      );
+      const json = component.toJSON();
+      assert(json === null);
+    });
+    act(() => {
+      foo.arr[0] && (foo.arr[0].name = 'a');
+    });
+    act(() => {
+      const json = component.toJSON();
+      assert(!(json instanceof Array) && json && json.children?.includes('a'));
+      done();
+    });
+  });
 });
