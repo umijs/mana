@@ -100,7 +100,7 @@ describe('reactivity', () => {
   });
 
   it('#reactable plain object', () => {
-    const v = {};
+    const v: any = {};
     const [tValue, reactor] = Reactable.transform(v);
     let changedTimes = 0;
     if (reactor) {

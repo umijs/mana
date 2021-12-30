@@ -61,7 +61,7 @@ export namespace Reactable {
     }
     return false;
   }
-  export function transform(value: any): [any, Reactor | undefined] {
+  export function transform<T = any>(value: T): [T, Reactor | undefined] {
     let reactor: Reactor | undefined = undefined;
     if (!Observability.trackable(value)) return [value, undefined];
     if (is(value)) {

@@ -87,8 +87,9 @@ export function observable<T extends Record<any, any>>(target: T): T {
   const origin = Observability.getOrigin(target);
   if (!properties) {
     if (Reactable.canBeReactable(target)) {
-      if (Observability.is(target)) {
-        return target;
+      const exsit = Reactable.get(origin);
+      if (exsit) {
+        return exsit;
       }
       const onChange = () => {
         Notifier.trigger(origin);

@@ -128,7 +128,10 @@ describe('observable', () => {
     class Foo {}
     const foo = new Foo();
     const reactable = observable(v);
-    const reactable1 = observable(reactable);
+    const reactable1 = observable(v);
+    const reactable2 = observable(reactable);
+    assert(reactable1 === reactable2);
+    assert(reactable === reactable1);
     const observableFoo = observable(foo);
     assert(Reactable.is(reactable));
     assert(Observability.is(v));
