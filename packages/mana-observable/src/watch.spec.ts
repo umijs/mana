@@ -2,19 +2,17 @@ import 'reflect-metadata';
 import 'regenerator-runtime/runtime';
 
 import assert from 'assert';
-import { observable } from './observable';
 import { watch } from './watch';
 import { Disposable } from 'mana-common';
 import { prop } from './decorator';
+
+console.warn = () => {};
 
 describe('watch', () => {
   it('#watch prop', done => {
     class Foo {
       @prop() name?: string;
       @prop() name1?: string;
-      constructor() {
-        observable(this);
-      }
     }
     const newName = 'new name';
     let watchLatest: string | undefined;
@@ -31,9 +29,6 @@ describe('watch', () => {
     class Foo {
       @prop() name?: string;
       @prop() info?: string;
-      constructor() {
-        observable(this);
-      }
     }
     let changed = 0;
     const newName = 'new name';
@@ -54,9 +49,6 @@ describe('watch', () => {
     class Foo {
       @prop() name?: string;
       info?: string;
-      constructor() {
-        observable(this);
-      }
     }
     const newName = 'new name';
     let watchLatest: string | undefined;
@@ -77,9 +69,6 @@ describe('watch', () => {
   it('#invalid watch', () => {
     class Foo {
       @prop() name?: string;
-      constructor() {
-        observable(this);
-      }
     }
     const foo = new Foo();
     const toDispose = (watch as any)(foo, 'name');

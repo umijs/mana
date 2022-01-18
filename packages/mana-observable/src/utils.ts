@@ -17,9 +17,9 @@ export namespace Observability {
     if (!trackable(obj)) return false;
     const origin = getOrigin(obj);
     if (property) {
-      return Reflect.hasMetadata(ObservableSymbol.Observable, origin, property);
+      return Reflect.hasOwnMetadata(ObservableSymbol.Observable, origin, property);
     }
-    return Reflect.hasMetadata(ObservableSymbol.Observable, origin);
+    return Reflect.hasOwnMetadata(ObservableSymbol.Observable, origin);
   }
   export function mark(obj: Record<any, any>, property?: string | symbol) {
     if (property) {

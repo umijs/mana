@@ -53,9 +53,6 @@ watch(ninja, (obj, prop) => {
 ```typescript
 class Ninja {
   @prop name: string = '';
-  constructor() {
-    observable(this);
-  }
 }
 ```
 
@@ -71,9 +68,6 @@ class Ninja {
 @singleton()
 class Ninja {
   @prop name: string = '';
-  constructor() {
-    observable(this);
-  }
 }
 
 container.register(Ninja);

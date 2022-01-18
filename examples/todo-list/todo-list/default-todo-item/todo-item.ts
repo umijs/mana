@@ -1,5 +1,5 @@
 import { singleton, inject } from 'mana-syringe';
-import { prop, observable } from 'mana-observable';
+import { prop } from 'mana-observable';
 import { v4 } from 'uuid';
 import type { ToDoItem } from '../todo-item-registry';
 
@@ -14,7 +14,6 @@ export class DefaultToDoItem implements ToDoItem {
   public completed: boolean = false;
   constructor(@inject(ToDoName) name: string) {
     this.name = name;
-    observable(this);
   }
   public toggle(value?: boolean): void {
     if (value === undefined) {

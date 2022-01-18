@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-parameter-properties */
 import { singleton, inject } from 'mana-syringe';
-import { prop, observable } from 'mana-observable';
+import { prop } from 'mana-observable';
 import type { ToDoItem, ToDoItemProvider } from './todo-item-registry';
 import { ToDoItemRegistry } from './todo-item-registry';
 
@@ -19,9 +19,7 @@ export class ToDoManager {
   //   return this.collection.length;
   // }
 
-  constructor(@inject(ToDoItemRegistry) protected todoRegistry: ToDoItemRegistry) {
-    observable(this);
-  }
+  constructor(@inject(ToDoItemRegistry) protected todoRegistry: ToDoItemRegistry) {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public add(type: string, name: string, ...args: any[]): void {
     const provider = this.todoRegistry.getToDoItemProvider(type);

@@ -1,12 +1,20 @@
 import { Disposable } from 'mana-common';
+import { observable } from './observable';
 import type { Notify } from './core';
 import { Notifier } from './notifier';
-import { getOrigin } from './utils';
+import { getOrigin, Observability } from './utils';
 
-console.warn = () => {};
+function tryObservable<T>(target: T) {
+  const data = getOrigin(target);
+  if (!Observability.is(data)) {
+    return observable(data);
+  }
+  return data;
+}
 
 function watchAll<T>(target: T, callback: Notify): Disposable {
   const data = getOrigin(target);
+  tryObservable(data);
   const tracker = Notifier.find(data);
   if (!tracker) {
     return Disposable.NONE;
@@ -20,6 +28,7 @@ function watchAll<T>(target: T, callback: Notify): Disposable {
 
 function watchProp<T>(target: T, prop: Extract<keyof T, string>, callback: Notify): Disposable {
   const data = getOrigin(target);
+  tryObservable(data);
   const tracker = Notifier.find(data, prop);
   if (tracker) {
     return tracker.onChange(callback);

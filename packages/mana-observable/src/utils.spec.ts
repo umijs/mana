@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import assert from 'assert';
 import { getDesignType, ObservableProperties, Observability, InstanceValue } from './utils';
 import { prop } from './decorator';
-import { Disposable } from 'mana-common/dist';
+import { Disposable } from 'mana-common';
 import { equals, ObservableSymbol } from '.';
 
 describe('utils', () => {

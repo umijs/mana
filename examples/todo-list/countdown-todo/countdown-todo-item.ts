@@ -1,5 +1,5 @@
 import { inject, singleton, postConstruct } from 'mana-syringe';
-import { prop, observable } from 'mana-observable';
+import { prop } from 'mana-observable';
 import { DefaultToDoItem, ToDoName } from '../todo-list/default-todo-item/todo-item';
 
 @singleton()
@@ -12,7 +12,6 @@ export class CountdownToDoItem extends DefaultToDoItem {
 
   constructor(@inject(ToDoName) name: string) {
     super(name);
-    observable(this);
     this.timer = setInterval(this.progressToDeadline, 1000 / 3);
   }
 
