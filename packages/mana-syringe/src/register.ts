@@ -1,14 +1,10 @@
 import type { interfaces } from 'inversify';
-import type { InversifyContext } from './inversify/inversify-protocol';
-import {
-  bindNamed,
-  bindGeneralToken,
-  bindMonoToken,
-  bindLifecycle,
-  isInversifyContext,
-} from './inversify';
+import type { InversifyRegister } from './inversify';
+import { isInversifyRegister } from './inversify';
+import { bindNamed, bindGeneralToken, bindMonoToken, bindLifecycle } from './inversify';
 import { Utils, Syringe } from './core';
 import { OptionSymbol } from './side-option';
+import { Container } from './container';
 
 export function toRegistryOption<P>(
   options: Syringe.InjectOption<P>,
@@ -40,7 +36,7 @@ export class Register<T> {
    * 注册目标 token，合并 token 配置后基于配置注册
    */
   static resolveTarget<R>(
-    context: Syringe.Container,
+    register: InversifyRegister,
     target: Syringe.Token<R>,
     option: Syringe.TargetOption<R> = {},
   ): void {
@@ -48,7 +44,7 @@ export class Register<T> {
       try {
         const sideOption = Reflect.getMetadata(OptionSymbol, target);
         if (sideOption) {
-          Register.resolveOption(context, sideOption);
+          Register.resolveOption(register, sideOption);
         }
       } catch (ex) {
         // noop
@@ -80,7 +76,7 @@ export class Register<T> {
         tokens.unshift(target);
         mixedOption.token = tokens;
       }
-      Register.resolveOption(context, mixedOption);
+      Register.resolveOption(register, mixedOption);
     } catch (ex) {
       // noop
     }
@@ -88,7 +84,7 @@ export class Register<T> {
   /**
    * 基于配置注册
    */
-  static resolveOption<R>(context: Syringe.Container, baseOption: Syringe.InjectOption<R>): void {
+  static resolveOption<R>(iRegister: InversifyRegister, baseOption: Syringe.InjectOption<R>): void {
     const parsedOption = toRegistryOption({
       ...Register.globalConfig,
       ...baseOption,
@@ -103,7 +99,7 @@ export class Register<T> {
     }
 
     parsedOption.token.forEach(token => {
-      const register = new Register(context, token, { ...parsedOption });
+      const register = new Register(iRegister, token, { ...parsedOption });
       register.resolve();
     });
   }
@@ -116,14 +112,14 @@ export class Register<T> {
    */
   protected generalToken: interfaces.ServiceIdentifier<T>;
   protected option: Syringe.FormattedInjectOption<T>;
-  protected context: Syringe.Container;
+  protected register: InversifyRegister;
   protected mutiple: boolean;
   constructor(
-    context: Syringe.Container,
+    register: InversifyRegister,
     token: Syringe.UnionToken<T>,
     option: Syringe.FormattedInjectOption<T>,
   ) {
-    this.context = context;
+    this.register = register;
     this.token = token;
     this.option = option;
     this.rawToken = Utils.isNamedToken(token) ? token.token : token;
@@ -136,70 +132,76 @@ export class Register<T> {
    * mono bind 优先级 useValue > useDynamic > useFactory > useClass
    */
   resolve(): void {
-    const { context } = this;
-    if (!isInversifyContext(context)) {
+    const { register } = this;
+    if (!isInversifyRegister(register)) {
       return;
     }
     if (this.mutiple) {
-      this.resolveMutilple(context);
+      this.resolveMutilple(register);
     } else {
-      this.resolveMono(context);
+      this.resolveMono(register);
       if (!this.named && this.option.contrib.length > 0) {
         this.option.contrib.forEach(contribution => {
           if (Utils.isMultipleEnabled(contribution)) {
-            bindGeneralToken(contribution, context).toService(this.generalToken);
+            bindGeneralToken(contribution, register).toService(this.generalToken);
           } else {
-            bindMonoToken(contribution, context).toService(this.generalToken);
+            bindMonoToken(contribution, register).toService(this.generalToken);
           }
         });
       }
     }
   }
   // eslint-disable-next-line consistent-return
-  protected resolveMono(context: InversifyContext): interfaces.BindingWhenOnSyntax<T> | undefined {
+  protected resolveMono(
+    register: InversifyRegister,
+  ): interfaces.BindingWhenOnSyntax<T> | undefined {
     if ('useValue' in this.option) {
-      return bindMonoToken(this.generalToken, context).toConstantValue(this.option.useValue!);
+      return bindMonoToken(this.generalToken, register).toConstantValue(this.option.useValue!);
     }
     if (this.option.useDynamic.length > 0) {
       const dynamic = this.option.useDynamic[this.option.useDynamic.length - 1];
       return bindLifecycle(
-        bindMonoToken(this.generalToken, context).toDynamicValue(() =>
-          dynamic({ container: this.context }),
-        ),
+        bindMonoToken(this.generalToken, register).toDynamicValue(ctx => {
+          const container = Container.getContainer(ctx.container as any)!;
+          return dynamic({ container });
+        }),
         this.option,
       );
     }
     if (this.option.useFactory.length > 0) {
       const factrory = this.option.useFactory[this.option.useFactory.length - 1];
-      return bindMonoToken(this.generalToken, context).toFactory(() =>
-        factrory({ container: this.context }),
-      );
+      return bindMonoToken(this.generalToken, register).toFactory(ctx => {
+        const container = Container.getContainer(ctx.container as any)!;
+        return factrory({ container });
+      });
     }
     if (this.option.useClass.length > 0) {
       const newable = this.option.useClass[this.option.useClass.length - 1];
-      return bindLifecycle(bindMonoToken(this.generalToken, context).to(newable), this.option);
+      return bindLifecycle(bindMonoToken(this.generalToken, register).to(newable), this.option);
     }
   }
-  protected resolveMutilple(context: InversifyContext): void {
+  protected resolveMutilple(register: InversifyRegister): void {
     const classesList = this.option.useClass.map(newable =>
-      bindLifecycle(bindGeneralToken(this.generalToken, context).to(newable), this.option),
+      bindLifecycle(bindGeneralToken(this.generalToken, register).to(newable), this.option),
     );
     const dynamicList = this.option.useDynamic.map(dynamic =>
       bindLifecycle(
-        bindGeneralToken(this.generalToken, context).toDynamicValue(() =>
-          dynamic({ container: this.context }),
-        ),
+        bindGeneralToken(this.generalToken, register).toDynamicValue(ctx => {
+          const container = Container.getContainer(ctx.container as any)!;
+          return dynamic({ container });
+        }),
         this.option,
       ),
     );
     const factoryList = this.option.useFactory.map(factrory =>
-      bindGeneralToken(this.generalToken, context).toFactory(() =>
-        factrory({ container: this.context }),
-      ),
+      bindGeneralToken(this.generalToken, register).toFactory(ctx => {
+        const container = Container.getContainer(ctx.container as any)!;
+        return factrory({ container });
+      }),
     );
     const valueToBind =
       'useValue' in this.option
-        ? bindGeneralToken(this.generalToken, context).toConstantValue(this.option.useValue!)
+        ? bindGeneralToken(this.generalToken, register).toConstantValue(this.option.useValue!)
         : undefined;
     if (this.named) {
       classesList.forEach(tobind => this.named && bindNamed(tobind, this.named));

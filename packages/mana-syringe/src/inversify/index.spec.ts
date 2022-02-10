@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 import assert from 'assert';
 import { injectable } from 'inversify';
-import { bindSingleton, bindTransient, bindLifecycle } from '.';
+import { bindSingleton, bindTransient, bindLifecycle, isInversifyContext } from '.';
 import { Syringe } from '../core';
 import { GlobalContainer } from '../container';
 import { Register } from '../register';
@@ -11,7 +11,10 @@ import { Register } from '../register';
 const fakeContainer: Syringe.Container = {
   register: () => {},
   remove: () => {},
-  load: () => {},
+  load: () => ({
+    dispose: () => {},
+  }),
+  unload: () => {},
   get: () => ({} as any),
   getNamed: () => ({} as any),
   getAll: () => [],
@@ -32,6 +35,7 @@ const emptyOptions: Syringe.FormattedInjectOption<any> = {
 describe('inversify', () => {
   it('#global container', () => {
     assert(GlobalContainer);
+    assert(isInversifyContext(GlobalContainer));
   });
   it('#bind singleton', () => {
     @injectable()
@@ -66,7 +70,7 @@ describe('inversify', () => {
     const FooFactory = Symbol('FooFactory');
     @injectable()
     class Foo {}
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [FooFactory],
       useFactory: [() => () => new Foo()],
@@ -81,13 +85,13 @@ describe('inversify', () => {
     const Foo = Symbol('Foo');
     const Bar = Symbol('Bar');
     const foo = {};
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [Foo],
       useValue: foo,
       lifecycle: Syringe.Lifecycle.singleton,
     });
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [Bar],
       useValue: false,
@@ -103,7 +107,7 @@ describe('inversify', () => {
     const Foo = Symbol('Foo');
     const named = 'named';
     const foo = {};
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [{ token: Foo, named }],
       useValue: foo,
@@ -118,7 +122,7 @@ describe('inversify', () => {
     const named = 'named';
     @injectable()
     class Foo {}
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [{ token: FooFactory, named }],
       useFactory: [() => () => new Foo()],
@@ -132,7 +136,7 @@ describe('inversify', () => {
     const FooDynamic = Symbol('FooDynamic');
     @injectable()
     class Foo {}
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [FooDynamic],
       useDynamic: [() => new Foo()],
@@ -146,7 +150,7 @@ describe('inversify', () => {
     const named = 'named';
     @injectable()
     class Foo {}
-    Register.resolveOption(GlobalContainer, {
+    Register.resolveOption(GlobalContainer.container, {
       ...emptyOptions,
       token: [{ token: FooDynamic, named }],
       useDynamic: [() => new Foo()],
@@ -158,7 +162,7 @@ describe('inversify', () => {
   it('#bind named', () => {
     @injectable()
     class Foo {}
-    Register.resolveOption<Foo>(GlobalContainer, {
+    Register.resolveOption<Foo>(GlobalContainer.container, {
       ...emptyOptions,
       token: [{ token: Foo, named: 'named' }],
       lifecycle: Syringe.Lifecycle.singleton,
@@ -171,7 +175,7 @@ describe('inversify', () => {
   it('#bind', () => {
     @injectable()
     class Foo {}
-    Register.resolveOption<Foo>(GlobalContainer, {
+    Register.resolveOption<Foo>(GlobalContainer.container, {
       ...emptyOptions,
       lifecycle: Syringe.Lifecycle.singleton,
       useClass: [Foo],
@@ -186,13 +190,13 @@ describe('inversify', () => {
     @injectable()
     class Foo {}
     try {
-      Register.resolveOption<Foo>(fakeContainer, {
+      Register.resolveOption<Foo>(fakeContainer as any, {
         ...emptyOptions,
         lifecycle: Syringe.Lifecycle.singleton,
         useClass: [Foo],
         token: [Foo],
       });
-      Register.resolveOption<Foo>(fakeContainer, {
+      Register.resolveOption<Foo>(fakeContainer as any, {
         ...emptyOptions,
         lifecycle: Syringe.Lifecycle.singleton,
         useClass: [Foo],

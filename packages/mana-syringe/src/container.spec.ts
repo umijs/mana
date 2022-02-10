@@ -225,25 +225,27 @@ describe('container', () => {
       class Foo {
         constructor(@contrib(FooSymbol) public provider: Contribution.Provider<Record<any, any>>) {}
       }
-      // const fooModule = Module().contribution(FooSymbol).register(Foo, FooContribution);
+      const baseModule = Module().register(Foo).contribution(FooSymbol);
       const fooModule = Module(reg => {
-        Contribution.register(reg, FooSymbol, { cache: false });
-        reg(Foo);
         reg(FooContribution);
       });
-      const barModule = Module((reg, ctx) => {
-        ctx.container.remove(FooSymbol);
+      const barModule = Module(reg => {
         reg(BarContribution);
       });
+      GlobalContainer.load(baseModule);
       GlobalContainer.load(fooModule);
       const foo = GlobalContainer.get(Foo);
       const contribs = foo.provider.getContributions();
       assert(contribs.length === 1);
       assert(contribs[0] instanceof FooContribution);
-      GlobalContainer.load(barModule);
+      GlobalContainer.unload(fooModule);
+      const toDispose = GlobalContainer.load(barModule);
       const newContribs = foo.provider.getContributions({ cache: false });
       assert(newContribs.length === 1);
       assert(newContribs[0] instanceof BarContribution);
+      toDispose.dispose();
+      const emptyContribs = foo.provider.getContributions({ cache: false });
+      assert(emptyContribs.length === 0);
     });
   });
   describe('basic', () => {

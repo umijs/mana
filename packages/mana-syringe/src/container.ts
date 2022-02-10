@@ -5,15 +5,25 @@ import {
   namedToIdentifier,
   tokenToIdentifier,
 } from './inversify';
-import type { Syringe } from './core';
+import type { Disposable, Syringe } from './core';
 import { Utils } from './core';
 import { Register } from './register';
+import { isSyringeModule } from './module';
+
+const ContainerMap = new Map<InversifyContainer, Syringe.Container>();
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class Container implements Syringe.Container, InversifyContext {
+  static setContainer(key: InversifyContainer, value: Syringe.Container) {
+    return ContainerMap.set(key, value);
+  }
+  static getContainer(key: InversifyContainer) {
+    return ContainerMap.get(key);
+  }
   static config(option: Syringe.InjectOption<void>): void {
     Register.globalConfig = option;
   }
+
   protected loadedModules: number[] = [];
   container: InversifyContainer;
   protected inversify: boolean = true;
@@ -24,11 +34,27 @@ export class Container implements Syringe.Container, InversifyContext {
     } else {
       this.container = new InversifyContainer();
     }
+    Container.setContainer(this.container, this);
   }
-  load(module: Syringe.Module, force?: boolean): void {
+  load(module: Syringe.Module, force?: boolean): Disposable {
     if (force || !this.loadedModules.includes(module.id)) {
-      module.registry(this.register.bind(this), this.resolveContext());
+      if (isSyringeModule(module)) {
+        this.container.load(module.inversifyModule);
+      }
       this.loadedModules.push(module.id);
+      return {
+        dispose: () => {
+          this.unload(module);
+        },
+      };
+    }
+    console.warn('Unsupported module.');
+    return { dispose: () => {} };
+  }
+  unload(module: Syringe.Module): void {
+    if (isSyringeModule(module)) {
+      this.container.unload(module.inversifyModule);
+      this.loadedModules = this.loadedModules.filter(id => id !== module.id);
     }
   }
   remove<T>(token: Syringe.Token<T>): void {
@@ -68,14 +94,10 @@ export class Container implements Syringe.Container, InversifyContext {
     options: Syringe.InjectOption<T> = {},
   ): void {
     if (Utils.isInjectOption(token)) {
-      Register.resolveOption(this, token);
+      Register.resolveOption(this.container, token);
     } else {
-      Register.resolveTarget(this, token, options);
+      Register.resolveTarget(this.container, token, options);
     }
-  }
-
-  protected resolveContext(): Syringe.Context {
-    return { container: this };
   }
 }
 

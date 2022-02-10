@@ -14,6 +14,12 @@ export type Abstract<T> = {
   prototype: T;
 };
 
+export type Disposable = {
+  /**
+   * Dispose this object.
+   */
+  dispose: () => void;
+};
 export namespace Syringe {
   /**
    * 定义注入标识，默认允许多重注入
@@ -52,14 +58,13 @@ export namespace Syringe {
     override: boolean;
   };
 
-  export type Registry = (register: Register, ctx: Context) => void;
+  export type Registry = (register: Register) => void;
   export type Module = {
     id: number;
-    registry: Registry;
   };
 
   export function isModule(data: Record<any, any> | undefined): data is Module {
-    return !!data && typeof data === 'object' && 'id' in data && 'registry' in data;
+    return !!data && typeof data === 'object' && 'id' in data;
   }
 
   export type Container = {
@@ -69,7 +74,8 @@ export namespace Syringe {
       token: Syringe.Token<T> | Syringe.InjectOption<T>,
       options?: Syringe.InjectOption<T>,
     ) => void;
-    load: (module: Module, force?: boolean) => void;
+    load: (module: Module, force?: boolean) => Disposable;
+    unload: (module: Module) => void;
     get: <T>(token: Syringe.Token<T>) => T;
     getNamed: <T>(token: Syringe.Token<T>, named: Syringe.Named) => T;
     getAll: <T>(token: Syringe.Token<T>) => T[];

@@ -1,7 +1,7 @@
 import type { interfaces } from 'inversify';
 import { Container } from 'inversify';
 import { Syringe, Utils } from '../core';
-import type { InversifyContext } from './inversify-protocol';
+import type { InversifyRegister } from './inversify-protocol';
 
 export function bindSingleton<T>(
   toBind: interfaces.BindingInSyntax<T>,
@@ -33,24 +33,23 @@ export function bindNamed<T>(
 
 export function bindGeneralToken<T>(
   token: interfaces.ServiceIdentifier<T>,
-  context: InversifyContext,
+  register: InversifyRegister,
 ): interfaces.BindingToSyntax<T> {
-  return context.container.bind(tokenToIdentifier(token));
+  return register.bind(tokenToIdentifier(token));
 }
 export function bindMonoToken<T>(
   token: interfaces.ServiceIdentifier<T>,
-  context: InversifyContext,
+  register: InversifyRegister,
 ): interfaces.BindingToSyntax<T> {
-  const { parent } = context.container;
-  const bindFromParent = parent && parent.isBound(tokenToIdentifier(token));
-  if (context.container.isBound(tokenToIdentifier(token)) && !bindFromParent) {
-    return context.container.rebind(tokenToIdentifier(token));
+  if (register.isBound(tokenToIdentifier(token))) {
+    try {
+      return register.rebind(tokenToIdentifier(token));
+    } catch (ex) {
+      // not bind in crrent container
+      return register.bind(tokenToIdentifier(token));
+    }
   }
-  return context.container.bind(tokenToIdentifier(token));
-}
-
-export function isInversifyContext(data: Record<any, any>): data is InversifyContext {
-  return data && typeof data === 'object' && 'container' in data && 'inversify' in data;
+  return register.bind(tokenToIdentifier(token));
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,3 +69,5 @@ export function tokenToIdentifier<T = any>(
   return token;
 }
 export const GlobalContainer = new Container();
+
+export * from './inversify-protocol';
