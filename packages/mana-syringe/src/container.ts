@@ -1,3 +1,4 @@
+import type { interfaces } from 'inversify';
 import { Container as InversifyContainer } from 'inversify';
 import type { InversifyContext } from './inversify/inversify-protocol';
 import {
@@ -10,25 +11,31 @@ import { Utils } from './core';
 import { Register } from './register';
 import { isSyringeModule } from './module';
 
-const ContainerMap = new Map<InversifyContainer, Syringe.Container>();
+const ContainerMap = new Map<number, Syringe.Container>();
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class Container implements Syringe.Container, InversifyContext {
-  static setContainer(key: InversifyContainer, value: Syringe.Container) {
-    return ContainerMap.set(key, value);
+  static setContainer(key: interfaces.Container, value: Syringe.Container) {
+    return ContainerMap.set(key.id, value);
   }
-  static getContainer(key: InversifyContainer) {
-    return ContainerMap.get(key);
+  static getContainer(key: interfaces.Container) {
+    const exist = ContainerMap.get(key.id);
+    if (!exist) {
+      const container = new Container(key);
+      Container.setContainer(key, container);
+      return container;
+    }
+    return exist;
   }
   static config(option: Syringe.InjectOption<void>): void {
     Register.globalConfig = option;
   }
 
   protected loadedModules: number[] = [];
-  container: InversifyContainer;
+  container: interfaces.Container;
   protected inversify: boolean = true;
   parent?: Container;
-  constructor(inversifyContainer?: InversifyContainer) {
+  constructor(inversifyContainer?: interfaces.Container) {
     if (inversifyContainer) {
       this.container = inversifyContainer;
     } else {

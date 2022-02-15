@@ -162,7 +162,7 @@ export class Register<T> {
       const dynamic = this.option.useDynamic[this.option.useDynamic.length - 1];
       return bindLifecycle(
         bindMonoToken(this.generalToken, register).toDynamicValue(ctx => {
-          const container = Container.getContainer(ctx.container as any)!;
+          const container = Container.getContainer(ctx.container)!;
           return dynamic({ container });
         }),
         this.option,
@@ -171,7 +171,7 @@ export class Register<T> {
     if (this.option.useFactory.length > 0) {
       const factrory = this.option.useFactory[this.option.useFactory.length - 1];
       return bindMonoToken(this.generalToken, register).toFactory(ctx => {
-        const container = Container.getContainer(ctx.container as any)!;
+        const container = Container.getContainer(ctx.container)!;
         return factrory({ container });
       });
     }
@@ -187,7 +187,7 @@ export class Register<T> {
     const dynamicList = this.option.useDynamic.map(dynamic =>
       bindLifecycle(
         bindGeneralToken(this.generalToken, register).toDynamicValue(ctx => {
-          const container = Container.getContainer(ctx.container as any)!;
+          const container = Container.getContainer(ctx.container)!;
           return dynamic({ container });
         }),
         this.option,
@@ -195,7 +195,7 @@ export class Register<T> {
     );
     const factoryList = this.option.useFactory.map(factrory =>
       bindGeneralToken(this.generalToken, register).toFactory(ctx => {
-        const container = Container.getContainer(ctx.container as any)!;
+        const container = Container.getContainer(ctx.container)!;
         return factrory({ container });
       }),
     );
