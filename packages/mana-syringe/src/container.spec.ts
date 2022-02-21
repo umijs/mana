@@ -3,6 +3,7 @@ import { register, GlobalContainer, Container } from './container';
 import { singleton, transient, injectable } from './decorator';
 import { Syringe } from './core';
 import { contrib, Contribution } from './contribution';
+import { Container as InversifyContainer } from 'inversify';
 import { Module } from './module';
 
 describe('container', () => {
@@ -251,11 +252,16 @@ describe('container', () => {
   describe('basic', () => {
     it('#new container', () => {
       @injectable()
-      class NewContainer {}
-      const container = new Container();
-      container.register(NewContainer);
-      const foo = container.get(NewContainer);
-      assert(foo instanceof NewContainer);
+      class NewFoo {}
+      const ctn = new InversifyContainer();
+      const container = Container.getContainer(ctn);
+      const cachedContainer = Container.getContainer(ctn);
+      const fooContainer = new Container();
+      assert(cachedContainer === container);
+      assert(cachedContainer !== fooContainer);
+      container.register(NewFoo);
+      const foo = container.get(NewFoo);
+      assert(foo instanceof NewFoo);
     });
     it('#global config', () => {
       Container.config({ lifecycle: Syringe.Lifecycle.singleton });
