@@ -6,7 +6,7 @@
     "inversify"
   ],
   "description": "IoC library for mana, easily to use.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "typings": "lib/index.d.ts",
   "main": "lib/index.js",
   "module": "es/index.js",

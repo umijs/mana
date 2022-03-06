@@ -7,7 +7,7 @@
     "react"
   ],
   "description": "Simple class property decorator that makes the class properties observable and can be easily used with React",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "typings": "lib/index.d.ts",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -20,8 +20,8 @@
     "src"
   ],
   "dependencies": {
-    "mana-common": "^0.3.0",
-    "mana-syringe": "^0.3.0"
+    "mana-common": "^0.3.1",
+    "mana-syringe": "^0.3.1"
   },
   "peerDependencies": {
     "react": ">=16.9.0"
