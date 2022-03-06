@@ -3,6 +3,7 @@ node_modules
 build
 lib
 dist
+es
 *.log
 .idea
 .metadata

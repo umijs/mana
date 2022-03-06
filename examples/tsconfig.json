@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "mana-common/*": ["../packages/mana-common/*"],
+      "mana-observable/*": ["../packages/mana-observable/*"],
+      "mana-syringe/*": ["../packages/mana-syringe/*"]
+    }
+  }
+}

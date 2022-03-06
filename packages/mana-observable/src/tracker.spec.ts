@@ -1,4 +1,3 @@
-import 'regenerator-runtime/runtime';
 import assert from 'assert';
 import { Trackable, Tracker } from './tracker';
 import { prop } from './decorator';

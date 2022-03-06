@@ -6,13 +6,15 @@
     "common"
   ],
   "version": "0.3.0",
-  "typings": "dist/index.d.ts",
-  "module": "dist/index.esm.js",
-  "main": "dist/index.js",
+  "typings": "lib/index.d.ts",
+  "module": "es/index.js",
+  "main": "lib/index.js",
   "files": [
     "package.json",
     "README.md",
     "dist",
+    "es",
+    "lib",
     "src"
   ],
   "scripts": {

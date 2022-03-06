@@ -1,13 +1,13 @@
 import React from 'react';
 import { Checkbox, Tooltip, Tag, List, Button } from 'antd';
 import type { DefaultToDoItem } from '../todo-item';
-import { useInject, useTrack, getOrigin } from 'mana-observable';
+import { useInject, useObserve, getOrigin } from 'mana-observable';
 import type { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { ToDoManager } from '../../manager';
 import './index.css';
 
 export const ToDoItemView: React.FC<{ todo: DefaultToDoItem }> = props => {
-  const todo = useTrack(props.todo);
+  const todo = useObserve(props.todo);
   const manager = useInject<ToDoManager>(ToDoManager);
   return (
     <List.Item

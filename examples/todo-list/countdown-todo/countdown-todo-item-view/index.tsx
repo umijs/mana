@@ -1,13 +1,13 @@
 import React from 'react';
 import { Checkbox, Tooltip, Tag, List, Button, Progress } from 'antd';
 import type { CountdownToDoItem } from '../countdown-todo-item';
-import { useInject, useTrack, getOrigin } from 'mana-observable';
+import { useInject, useObserve, getOrigin } from 'mana-observable';
 import type { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { ToDoManager } from '../../todo-list/manager';
 import styles from './index.less';
 
 export const CountdownToDoItemView: React.FC<{ todo: CountdownToDoItem }> = props => {
-  const todo = useTrack(props.todo);
+  const todo = useObserve(props.todo);
   const manager = useInject<ToDoManager>(ToDoManager);
   const percent = parseFloat(((todo.delta * 100) / todo.deadLine).toFixed(2));
   let status: 'active' | 'success' | 'exception' = 'active';

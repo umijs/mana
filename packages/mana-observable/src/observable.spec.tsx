@@ -1,4 +1,3 @@
-import 'regenerator-runtime/runtime';
 import 'react';
 import assert from 'assert';
 import { observable } from './observable';

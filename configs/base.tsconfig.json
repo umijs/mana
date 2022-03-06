@@ -6,7 +6,7 @@
     "lib": ["ESNext", "DOM"],
     "allowJs": true,
     "jsx": "preserve",
-    "outDir": "./out",
+    "outDir": "lib",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -16,9 +16,12 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "importHelpers": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["reflect-metadata", "jest", "node"]
-  },
-  "include": ["dev-packages/*/src", "packages/*/src", "examples/**/*", "**/**.js"]
+  }
 }

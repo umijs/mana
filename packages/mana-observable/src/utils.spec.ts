@@ -1,4 +1,3 @@
-import 'regenerator-runtime/runtime';
 import 'reflect-metadata';
 import assert from 'assert';
 import { getDesignType, ObservableProperties, Observability, InstanceValue } from './utils';

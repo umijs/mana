@@ -3,10 +3,8 @@
 import 'reflect-metadata';
 import React, { useEffect } from 'react';
 import assert from 'assert';
-import { useObserve } from './hooks';
+import { useObserve, observable, useObservableState, prop } from 'mana-observable';
 import renderer, { act } from 'react-test-renderer';
-import { observable, useObservableState } from '.';
-import { prop } from './decorator';
 
 describe('use', () => {
   it('#useObserve basic ', done => {

@@ -8,7 +8,16 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   testRegex: '(/__test__/.*|(\\.|/)(test|spec))\\.tsx?$',
-  coveragePathIgnorePatterns: ['/dist/', '/node_modules/'],
+  collectCoverageFrom: [
+    '**/packages/**/*.{ts,tsx}',
+    '!**/node_modules/**',
+    '!**/vendor/**',
+    '!**/lib/**',
+    '!**/dist/**',
+    '!**/es/**',
+    '!**/examples/**',
+  ],
+  coveragePathIgnorePatterns: ['/dist/', '/node_modules/', '.umi'],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.jest.json',

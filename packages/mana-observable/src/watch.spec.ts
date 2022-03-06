@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import 'regenerator-runtime/runtime';
 
 import assert from 'assert';
 import { watch } from './watch';

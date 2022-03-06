@@ -1,12 +1,28 @@
 {
-  "extends": "./configs/base.tsconfig",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "mana-common/*": ["packages/mana-common/*"],
-      "mana-observable/*": ["packages/mana-observable/*"],
-      "mana-syringe/*": ["packages/mana-syringe/*"]
-    }
-  },
-  "include": ["dev-packages/*/src", "packages/*/src", "examples/**/*", "**/**.js"]
+    "composite": true,
+    "noEmitOnError": false,
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["ESNext", "DOM"],
+    "allowJs": true,
+    "jsx": "preserve",
+    "outDir": "lib",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "importHelpers": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["reflect-metadata", "jest", "node"]
+  }
 }

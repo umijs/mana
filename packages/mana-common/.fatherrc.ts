@@ -1,4 +1,6 @@
 export default {
-  esm: 'rollup',
-  cjs: 'rollup',
+  esm: 'babel',
+  cjs: 'babel',
+  target: 'node',
+  nodeVersion: 10,
 };
