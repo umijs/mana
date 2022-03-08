@@ -47,6 +47,8 @@ export class Container implements Syringe.Container, InversifyContext {
     if (force || !this.loadedModules.includes(module.id)) {
       if (isSyringeModule(module)) {
         this.container.load(module.inversifyModule);
+      } else {
+        console.warn('Unsupported module.', module);
       }
       this.loadedModules.push(module.id);
       return {
@@ -55,7 +57,6 @@ export class Container implements Syringe.Container, InversifyContext {
         },
       };
     }
-    console.warn('Unsupported module.');
     return { dispose: () => {} };
   }
   unload(module: Syringe.Module): void {
