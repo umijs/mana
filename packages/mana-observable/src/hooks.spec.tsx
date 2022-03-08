@@ -38,6 +38,46 @@ describe('use', () => {
       done();
     });
   });
+
+  it('#useObserve effects ', done => {
+    class Foo {
+      @prop() info: number = 0;
+    }
+    const SINGLETON_FOO = new Foo();
+    let times = 0;
+    let infoTimes = 0;
+    const FooRender = () => {
+      const foo = useObserve(SINGLETON_FOO);
+      React.useEffect(() => {
+        times += 1;
+      }, [foo]);
+      React.useEffect(() => {
+        infoTimes += 1;
+      }, [foo.info]);
+      return <div>{foo && foo.info}</div>;
+    };
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(
+        <>
+          <FooRender />
+        </>,
+      );
+
+      const json = component.toJSON();
+      assert(json === null);
+    });
+    act(() => {
+      SINGLETON_FOO.info = 1;
+    });
+    act(() => {
+      const json = component.toJSON();
+      assert(!(json instanceof Array) && json && json.children?.find(item => item === '1'));
+      assert(times === 1);
+      assert(infoTimes === 2);
+      done();
+    });
+  });
   it('#useObserve array', done => {
     class Foo {
       @prop() list: number[] = [];

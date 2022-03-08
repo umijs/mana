@@ -6,7 +6,10 @@ describe('Tracker', () => {
   it('#trackable', () => {
     class Foo {}
     const foo = new Foo();
-    const f = Tracker.track(foo, () => {});
+    const callback = () => {};
+    const f = Tracker.track(foo, callback);
+    const f1 = Tracker.track(foo, callback);
+    assert(f === f1);
     assert(Trackable.is(f));
     assert(Observability.getOrigin(f) === foo);
     assert(Trackable.tryGetOrigin(f) === foo);

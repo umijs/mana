@@ -123,6 +123,70 @@ describe('context', () => {
     });
   });
 
+  it('#useInject effects ', done => {
+    @singleton()
+    class Bar {
+      @prop() info: number = 0;
+    }
+    @singleton()
+    class Foo {
+      @prop() info: number = 0;
+      @inject(Bar) bar!: Bar;
+    }
+    GlobalContainer.register(Foo);
+    GlobalContainer.register(Bar);
+
+    let fooTimes = 0;
+    let barTimes = 0;
+    let barInfoTimes = 0;
+    let dispatchTimes = 0;
+
+    const FooRender = () => {
+      const foo = useInject(Foo);
+      const [, dispatch] = React.useReducer<(prevState: any, action: any) => any>(() => {}, {});
+      React.useEffect(() => {
+        fooTimes += 1;
+      }, [foo]);
+      React.useEffect(() => {
+        barTimes += 1;
+      }, [foo.bar]);
+      React.useEffect(() => {
+        barInfoTimes += 1;
+      }, [foo.bar.info]);
+      React.useEffect(() => {
+        dispatchTimes += 1;
+      }, [dispatch]);
+      return (
+        <div>
+          {foo.info} {foo.bar.info}
+        </div>
+      );
+    };
+    let component: renderer.ReactTestRenderer;
+    act(() => {
+      component = renderer.create(
+        <>
+          <FooRender />
+        </>,
+      );
+
+      const json = component.toJSON();
+      assert(json === null);
+    });
+    act(() => {
+      GlobalContainer.get(Foo).info = 1;
+      GlobalContainer.get(Foo).bar.info = 1;
+    });
+    act(() => {
+      const json = component.toJSON();
+      assert(!(json instanceof Array) && json && json.children?.includes('1'));
+      assert(fooTimes === 1);
+      assert(barTimes === 1);
+      assert(barInfoTimes === 2);
+      assert(dispatchTimes === 1);
+      done();
+    });
+  });
   it('#use observe', done => {
     class Bar {
       @prop() info: number = 1;
