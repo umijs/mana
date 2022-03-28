@@ -92,6 +92,9 @@ export namespace Tracker {
     return new Proxy(toTrack, {
       get(target: any, property: string | symbol): any {
         const value = target[property];
+        if (property === ObservableSymbol.Self) {
+          return value;
+        }
         if (Observability.trackable(value)) {
           return track(value, act);
         }
@@ -104,6 +107,9 @@ export namespace Tracker {
     return new Proxy(toTrack, {
       get(target: any, property: string | symbol): any {
         const value = target[property];
+        if (property === ObservableSymbol.Self) {
+          return value;
+        }
         if (Observability.trackable(value)) {
           return track(value, act);
         }
@@ -116,6 +122,9 @@ export namespace Tracker {
     return new Proxy(toTrack, {
       get(target: any, property: string | symbol): any {
         const value = target[property];
+        if (property === ObservableSymbol.Self) {
+          return value;
+        }
         if (property === 'get' && typeof value === 'function') {
           return function (...args: any[]) {
             const innerValue = value.apply(target, args);

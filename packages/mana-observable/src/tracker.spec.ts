@@ -4,7 +4,17 @@ import { prop } from './decorator';
 import { Observability } from './utils';
 describe('Tracker', () => {
   it('#trackable', () => {
-    class Foo {}
+    const originList: string[] = [];
+    const originMap = new Map();
+    const originObj = {};
+    class Foo {
+      @prop()
+      list = originList;
+      @prop()
+      map = originMap;
+      @prop()
+      obj = originObj;
+    }
     const foo = new Foo();
     const callback = () => {};
     const f = Tracker.track(foo, callback);
@@ -12,6 +22,9 @@ describe('Tracker', () => {
     assert(f === f1);
     assert(Trackable.is(f));
     assert(Observability.getOrigin(f) === foo);
+    assert(Observability.getOrigin(f.list) === originList);
+    assert(Observability.getOrigin(f.map) === originMap);
+    assert(Observability.getOrigin(f.obj) === originObj);
     assert(Trackable.tryGetOrigin(f) === foo);
     assert(null === Trackable.tryGetOrigin(null));
   });
