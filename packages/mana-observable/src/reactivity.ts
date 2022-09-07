@@ -42,7 +42,7 @@ export namespace Reactable {
     Reflect.defineMetadata(ObservableSymbol.Reactor, value, target);
   }
 
-  export function get<T>(target: T): T & Reactable {
+  export function get<T extends Record<any, any>>(target: T): T & Reactable {
     return Reflect.getMetadata(ObservableSymbol.Reactor, target);
   }
   export function canBeReactable(value: any): boolean {

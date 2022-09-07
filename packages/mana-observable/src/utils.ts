@@ -7,7 +7,7 @@ interface Original {
 }
 
 export namespace Observability {
-  export function trackable(obj: any): boolean {
+  export function trackable(obj: any): obj is Record<string | number | symbol, any> {
     return !!obj && typeof obj === 'object';
   }
   export function notifiable(obj: any, property: string | symbol): boolean {

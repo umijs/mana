@@ -2,7 +2,7 @@
 
 import 'reflect-metadata';
 
-import type { ErrorInfo } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import React from 'react';
 import assert from 'assert';
 import { defaultObservableContext, ObservableContext } from './context';
@@ -16,7 +16,7 @@ import { getOrigin } from './utils';
 
 console.error = () => {};
 
-class ErrorBoundary extends React.Component {
+class ErrorBoundary extends React.Component<{ children?: ReactNode }> {
   state: { error?: Error; errorInfo?: ErrorInfo } = {
     error: undefined,
     errorInfo: undefined,
@@ -24,7 +24,7 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ error, errorInfo });
   }
-  render() {
+  render(): React.ReactNode {
     if (this.state.error) {
       return (
         <div>

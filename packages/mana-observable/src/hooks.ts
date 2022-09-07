@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 import { Tracker } from './tracker';
+import { Observability } from './utils';
 
 interface Action<T> {
   key: keyof T;
@@ -21,6 +22,9 @@ export function useObserve<T>(obj: T): T {
     reducer,
     {},
   );
+  if (!Observability.trackable(obj)) {
+    return obj;
+  }
   return Tracker.track(obj, dispatch);
 }
 

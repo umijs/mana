@@ -6,6 +6,9 @@ import { getOrigin, Observability } from './utils';
 
 function tryObservable<T>(target: T) {
   const data = getOrigin(target);
+  if (!Observability.trackable(data)) {
+    return data;
+  }
   if (!Observability.is(data)) {
     return observable(data);
   }
@@ -14,6 +17,9 @@ function tryObservable<T>(target: T) {
 
 function watchAll<T>(target: T, callback: Notify): Disposable {
   const data = getOrigin(target);
+  if (!Observability.trackable(data)) {
+    return Disposable.NONE;
+  }
   tryObservable(data);
   const tracker = Notifier.find(data);
   if (!tracker) {

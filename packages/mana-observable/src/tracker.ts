@@ -43,13 +43,16 @@ export namespace Trackable {
   }
 }
 export namespace Tracker {
-  export function set<T = any>(target: T, act: Act, proxy: T) {
+  export function set<T extends Record<any, any> = any>(target: T, act: Act, proxy: T) {
     Reflect.defineMetadata(act, proxy, target, ObservableSymbol.Tracker);
   }
-  export function get<T = any>(target: T, act: Act): (T & Trackable) | undefined {
+  export function get<T extends Record<any, any> = any>(
+    target: T,
+    act: Act,
+  ): (T & Trackable) | undefined {
     return Reflect.getMetadata(act, target, ObservableSymbol.Tracker);
   }
-  export function has<T = any>(target: T, act: Act) {
+  export function has<T extends Record<any, any> = any>(target: T, act: Act) {
     return Reflect.hasOwnMetadata(act, target, ObservableSymbol.Tracker);
   }
 
