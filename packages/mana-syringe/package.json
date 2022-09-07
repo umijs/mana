@@ -11,6 +11,7 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "unpkg": "dist/index.umd.min.js",
+  "license": "MIT",
   "files": [
     "package.json",
     "README.md",

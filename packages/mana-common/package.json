@@ -9,6 +9,7 @@
   "typings": "lib/index.d.ts",
   "module": "es/index.js",
   "main": "lib/index.js",
+  "license": "MIT",
   "files": [
     "package.json",
     "README.md",
